@@ -1,12 +1,12 @@
-import { AgentTeam, TokenRingPackage } from "@tokenring-ai/agent";
-import packageJSON from "./package.json" with { type: "json" };
+import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import packageJSON from "./package.json" with {type: "json"};
 import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
-import { CheckpointPackageConfigSchema } from "@tokenring-ai/checkpoint";
+import {CheckpointPackageConfigSchema} from "@tokenring-ai/checkpoint";
 import {createPostgresStorage, postgresStorageConfigSchema} from "./postgres/createPostgresStorage.js";
 import {createSQLiteStorage, sqliteStorageConfigSchema} from "./sqlite/createSQLiteStorage.js";
 import {createMySQLStorage, mysqlStorageConfigSchema} from "./mysql/createMySQLStorage.js";
 
-export const packageInfo: TokenRingPackage = {
+export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
@@ -40,4 +40,4 @@ export const packageInfo: TokenRingPackage = {
         .catch(console.error);
     }
   },
-};
+} as TokenRingPackage;
