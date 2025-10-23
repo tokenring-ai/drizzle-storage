@@ -1,0 +1,26 @@
+{
+  "name": "@tokenring-ai/drizzle-storage",
+  "version": "0.1.0",
+  "description": "Multi-database storage for Token Ring using Drizzle ORM",
+  "dependencies": {
+    "@tokenring-ai/ai-client": "0.1.0",
+    "drizzle-orm": "^0.36.4",
+    "mysql2": "^3.11.5",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.28.1",
+    "vitest": "^2.1.8",
+    "testcontainers": "^10.16.0"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest",
+    "db:generate": "drizzle-kit generate && drizzle-kit generate --config=drizzle.mysql.config.ts && drizzle-kit generate --config=drizzle.postgres.config.ts"
+  },
+  "type": "module"
+}
