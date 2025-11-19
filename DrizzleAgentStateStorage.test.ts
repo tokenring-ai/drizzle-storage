@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { GenericContainer, StartedTestContainer } from "testcontainers";
-import { NamedAgentCheckpoint, AgentCheckpointProvider } from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
-import { unlinkSync } from "fs";
-import { createSQLiteStorage } from "./sqlite/createSQLiteStorage.js";
-import { createMySQLStorage } from "./mysql/createMySQLStorage.js";
-import { createPostgresStorage } from "./postgres/createPostgresStorage.js";
+import {AgentCheckpointProvider, NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
+import {unlinkSync} from "fs";
+import {GenericContainer, StartedTestContainer} from "testcontainers";
+import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {createMySQLStorage} from "./mysql/createMySQLStorage.js";
+import {createPostgresStorage} from "./postgres/createPostgresStorage.js";
+import {createSQLiteStorage} from "./sqlite/createSQLiteStorage.js";
 
 describe("DrizzleAgentStateStorage", () => {
   describe("SQLite", () => {
@@ -21,14 +21,15 @@ describe("DrizzleAgentStateStorage", () => {
     afterAll(() => {
       try {
         unlinkSync(dbPath);
-      } catch {}
+      } catch {
+      }
     });
 
     it("should store and retrieve checkpoint", async () => {
       const checkpoint: NamedAgentCheckpoint = {
         agentId: "test-agent-1",
         name: "session-1",
-        state: { agentState: { messages: {hello: "world"} }, toolsEnabled: ["foo"], hooksEnabled: ["bar"] },
+        state: {agentState: {messages: {hello: "world"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
         createdAt: Date.now(),
       };
 
@@ -87,7 +88,7 @@ describe("DrizzleAgentStateStorage", () => {
       const checkpoint: NamedAgentCheckpoint = {
         agentId: "test-agent-mysql",
         name: "session-mysql",
-        state: { agentState: { messages: {hello: "mysql"} }, toolsEnabled: ["foo"], hooksEnabled: ["bar"] },
+        state: {agentState: {messages: {hello: "mysql"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
         createdAt: Date.now(),
       };
 
@@ -136,7 +137,7 @@ describe("DrizzleAgentStateStorage", () => {
       const checkpoint: NamedAgentCheckpoint = {
         agentId: "test-agent-pg",
         name: "session-pg",
-        state: { agentState: { messages: {hello: "postgres"} }, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
+        state: {agentState: {messages: {hello: "postgres"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
         createdAt: Date.now(),
       };
 

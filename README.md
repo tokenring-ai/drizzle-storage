@@ -2,9 +2,12 @@
 
 ## Overview
 
-The `@tokenring-ai/drizzle-storage` package provides a multi-database storage solution using Drizzle ORM for managing agent state checkpoints in the Token Ring AI system. It implements the `AgentCheckpointProvider` interface with support for SQLite (Bun), MySQL, and PostgreSQL databases.
+The `@tokenring-ai/drizzle-storage` package provides a multi-database storage solution using Drizzle ORM for managing
+agent state checkpoints in the Token Ring AI system. It implements the `AgentCheckpointProvider` interface with support
+for SQLite (Bun), MySQL, and PostgreSQL databases.
 
 Key features:
+
 - Multi-database support: Bun SQLite, MySQL, PostgreSQL
 - Automatic schema migrations using Drizzle Kit
 - Type-safe database operations with Drizzle ORM
@@ -34,14 +37,17 @@ Key features:
 
 ### Storage Factory Functions
 
-The package provides separate factory functions for each database type, all implementing the `AgentCheckpointProvider` interface.
+The package provides separate factory functions for each database type, all implementing the `AgentCheckpointProvider`
+interface.
 
 **Factory Functions**:
+
 - `createSQLiteStorage(config: { type: "sqlite", databasePath: string }): AgentCheckpointProvider`
 - `createMySQLStorage(config: { type: "mysql", connectionString: string }): AgentCheckpointProvider`
 - `createPostgresStorage(config: { type: "postgres", connectionString: string }): AgentCheckpointProvider`
 
 **AgentCheckpointProvider Methods**:
+
 - `storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string>` - Stores checkpoint, returns ID
 - `retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>` - Retrieves by ID
 - `listCheckpoints(): Promise<AgentCheckpointListItem[]>` - Lists all checkpoints
@@ -49,6 +55,7 @@ The package provides separate factory functions for each database type, all impl
 ### Schema
 
 All databases use the same logical schema:
+
 - `id`: Auto-incrementing primary key
 - `agentId`: Agent identifier (TEXT)
 - `name`: Checkpoint name (TEXT)
@@ -133,6 +140,7 @@ bun run test
 ```
 
 Tests cover:
+
 - SQLite with local file database
 - MySQL with testcontainers
 - PostgreSQL with testcontainers
@@ -142,30 +150,36 @@ Tests cover:
 ## Configuration Options
 
 ### SQLite
+
 - `type`: `"sqlite"`
 - `databasePath`: Path to SQLite file
 
 ### MySQL
+
 - `type`: `"mysql"`
 - `connectionString`: MySQL connection string (format: `mysql://user:pass@host:port/db`)
 
 ### PostgreSQL
+
 - `type`: `"postgres"`
 - `connectionString`: PostgreSQL connection string (format: `postgres://user:pass@host:port/db`)
 
 ## API Reference
 
 ### Factory Functions
+
 - `createSQLiteStorage(config: { type: "sqlite", databasePath: string }): AgentCheckpointProvider`
 - `createMySQLStorage(config: { type: "mysql", connectionString: string }): AgentCheckpointProvider`
 - `createPostgresStorage(config: { type: "postgres", connectionString: string }): AgentCheckpointProvider`
 
 ### AgentCheckpointProvider Interface
+
 - `storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string>`
 - `retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>`
 - `listCheckpoints(): Promise<AgentCheckpointListItem[]>`
 
 ### Types
+
 - `NamedAgentCheckpoint`: `{ agentId: string; name: string; state: any; createdAt: number }`
 - `StoredAgentCheckpoint`: `{ id: string; name: string; agentId: string; state: any; createdAt: number }`
 - `AgentCheckpointListItem`: `{ id: string; name: string; agentId: string; createdAt: number }`

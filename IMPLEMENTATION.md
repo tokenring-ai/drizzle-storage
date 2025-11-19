@@ -2,7 +2,8 @@
 
 ## Overview
 
-Created `@tokenring-ai/drizzle-storage` package implementing the same `AgentCheckpointProvider` interface as `sqlite-storage`, with multi-database support using Drizzle ORM.
+Created `@tokenring-ai/drizzle-storage` package implementing the same `AgentCheckpointProvider` interface as
+`sqlite-storage`, with multi-database support using Drizzle ORM.
 
 ## Key Features
 
@@ -53,6 +54,7 @@ Following Drizzle's codebase-first approach:
 ## Configuration
 
 ### SQLite
+
 ```typescript
 new DrizzleAgentStateStorage({
   type: "sqlite",
@@ -61,6 +63,7 @@ new DrizzleAgentStateStorage({
 ```
 
 ### MySQL
+
 ```typescript
 new DrizzleAgentStateStorage({
   type: "mysql",
@@ -69,6 +72,7 @@ new DrizzleAgentStateStorage({
 ```
 
 ### PostgreSQL
+
 ```typescript
 new DrizzleAgentStateStorage({
   type: "postgres",
@@ -85,6 +89,7 @@ bun run test
 ```
 
 Test coverage:
+
 - ✅ SQLite: Local file database
 - ✅ MySQL: Docker container (mysql:8.0)
 - ✅ PostgreSQL: Docker container (postgres:16)
@@ -94,12 +99,14 @@ Test coverage:
 ## Dependencies
 
 **Runtime**:
+
 - `drizzle-orm`: Type-safe ORM
 - `mysql2`: MySQL driver
 - `postgres`: PostgreSQL driver
 - `@tokenring-ai/ai-client`: Token Ring integration
 
 **Development**:
+
 - `drizzle-kit`: Migration generator
 - `vitest`: Testing framework
 - `testcontainers`: Docker container management

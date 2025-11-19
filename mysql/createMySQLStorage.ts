@@ -1,5 +1,6 @@
 import {
-  AgentCheckpointListItem, AgentCheckpointProvider,
+  AgentCheckpointListItem,
+  AgentCheckpointProvider,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint
 } from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
@@ -16,7 +17,7 @@ export const mysqlStorageConfigSchema = z.object({
   connectionString: z.string(),
 });
 
-export function createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSchema>) : AgentCheckpointProvider {
+export function createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSchema>): AgentCheckpointProvider {
   const connection = mysql.createPool(config.connectionString);
   const db = drizzleMysql(connection);
   migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});

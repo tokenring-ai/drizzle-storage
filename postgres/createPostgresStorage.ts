@@ -1,5 +1,6 @@
 import {
-  AgentCheckpointListItem, AgentCheckpointProvider,
+  AgentCheckpointListItem,
+  AgentCheckpointProvider,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint
 } from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
@@ -16,7 +17,7 @@ export const postgresStorageConfigSchema = z.object({
   connectionString: z.string(),
 });
 
-export function createPostgresStorage(config: z.infer<typeof postgresStorageConfigSchema>) : AgentCheckpointProvider {
+export function createPostgresStorage(config: z.infer<typeof postgresStorageConfigSchema>): AgentCheckpointProvider {
   const connection = postgres(config.connectionString);
   const db = drizzlePostgres(connection);
   migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});

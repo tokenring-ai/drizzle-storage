@@ -1,5 +1,6 @@
 import {
-  AgentCheckpointListItem, AgentCheckpointProvider,
+  AgentCheckpointListItem,
+  AgentCheckpointProvider,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint
 } from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
@@ -16,7 +17,7 @@ export const sqliteStorageConfigSchema = z.object({
   databasePath: z.string(),
 });
 
-export function createSQLiteStorage(config: z.infer<typeof sqliteStorageConfigSchema>) : AgentCheckpointProvider {
+export function createSQLiteStorage(config: z.infer<typeof sqliteStorageConfigSchema>): AgentCheckpointProvider {
   const sqlite = new Database(config.databasePath);
   const db = drizzleSqlite(sqlite);
   migrateSqlite(db, {migrationsFolder: join(import.meta.dirname, "migrations")});

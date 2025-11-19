@@ -1,10 +1,10 @@
 import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
-import packageJSON from "./package.json" with {type: "json"};
-import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
 import {CheckpointPackageConfigSchema} from "@tokenring-ai/checkpoint";
+import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
+import {createMySQLStorage, mysqlStorageConfigSchema} from "./mysql/createMySQLStorage.js";
+import packageJSON from "./package.json" with {type: "json"};
 import {createPostgresStorage, postgresStorageConfigSchema} from "./postgres/createPostgresStorage.js";
 import {createSQLiteStorage, sqliteStorageConfigSchema} from "./sqlite/createSQLiteStorage.js";
-import {createMySQLStorage, mysqlStorageConfigSchema} from "./mysql/createMySQLStorage.js";
 
 export default {
   name: packageJSON.name,
