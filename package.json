@@ -1,9 +1,12 @@
 {
  "name": "@tokenring-ai/drizzle-storage",
- "version": "0.1.0",
+ "version": "0.2.0",
  "description": "Multi-database storage for Token Ring using Drizzle ORM",
  "dependencies": {
-  "@tokenring-ai/chat": "0.1.0",
+  "@tokenring-ai/app": "0.2.0",
+  "@tokenring-ai/chat": "0.2.0",
+  "@tokenring-ai/checkpoint": "0.2.0",
+  "zod": "^4.1.13",
   "drizzle-orm": "^0.44.7",
   "mysql2": "^3.15.3",
   "postgres": "^3.4.7"
