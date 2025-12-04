@@ -16,8 +16,7 @@ export default {
 
     if (config) {
       app.services
-        .waitForItemByType(AgentCheckpointService)
-        .then((checkpointService) => {
+        .waitForItemByType(AgentCheckpointService, (checkpointService) => {
           for (const name in config.providers) {
             const provider = config.providers[name];
             if (provider.type === "sqlite") {
@@ -37,8 +36,7 @@ export default {
               )
             }
           }
-        })
-        .catch(console.error);
+        });
     }
   },
 } as TokenRingPlugin;
