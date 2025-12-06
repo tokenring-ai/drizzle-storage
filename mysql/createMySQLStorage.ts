@@ -29,6 +29,7 @@ export function createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSche
         .values({
           agentId: checkpoint.agentId,
           name: checkpoint.name,
+          config: JSON.stringify(checkpoint.config),
           state: JSON.stringify(checkpoint.state),
           createdAt: checkpoint.createdAt,
         });
@@ -48,6 +49,7 @@ export function createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSche
         id: row.id.toString(),
         name: row.name,
         agentId: row.agentId,
+        config: JSON.parse(row.config),
         state: JSON.parse(row.state),
         createdAt: Number(row.createdAt),
       };

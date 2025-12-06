@@ -1,0 +1,1 @@
+ALTER TABLE "AgentState" ADD COLUMN "config" text NOT NULL;

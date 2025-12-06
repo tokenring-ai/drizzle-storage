@@ -24,7 +24,12 @@
  "license": "MIT",
  "scripts": {
   "test": "vitest",
-  "db:generate": "drizzle-kit generate && drizzle-kit generate --config=drizzle.mysql.config.ts && drizzle-kit generate --config=drizzle.postgres.config.ts"
+  "db:generate": "bun run db:generate:sqlite && bun run db:generate:postgres && bun run db:generate:mysql",
+  "db:generate:sqlite": "cd sqlite && drizzle-kit generate",
+  "db:generate:postgres": "cd postgres && drizzle-kit generate",
+  "db:generate:mysql": "cd mysql && drizzle-kit generate"
+
+
  },
  "type": "module"
 }
