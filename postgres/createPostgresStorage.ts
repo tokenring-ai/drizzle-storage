@@ -20,9 +20,23 @@ export const postgresStorageConfigSchema = z.object({
 export function createPostgresStorage(config: z.infer<typeof postgresStorageConfigSchema>): AgentCheckpointProvider {
   const connection = postgres(config.connectionString);
   const db = drizzlePostgres(connection);
-  migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
 
   return {
+    async start() {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS "AgentState" (
+         "id" bigserial PRIMARY KEY NOT NULL,
+         "agentId"   text   NOT NULL,
+         "name"      text   NOT NULL,
+         "config"    text   NOT NULL,
+         "state"     text   NOT NULL,
+         "createdAt" bigint NOT NULL
+        );
+     `);
+      //TODO: Migrations do not work well due to bun packaging. We should fix this.
+      //migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
+
+    },
     async storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
 
       const result = await db

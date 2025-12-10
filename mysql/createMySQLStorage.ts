@@ -20,9 +20,24 @@ export const mysqlStorageConfigSchema = z.object({
 export function createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSchema>): AgentCheckpointProvider {
   const connection = mysql.createPool(config.connectionString);
   const db = drizzleMysql(connection);
-  migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
 
   return {
+    async start() {
+      await db.execute(`
+          CREATE TABLE \`AgentState\`
+          (
+              \`id\`        bigint AUTO_INCREMENT NOT NULL,
+              \`agentId\`   text                  NOT NULL,
+              \`name\`      text                  NOT NULL,
+              \`config\`    text                  NOT NULL,
+              \`state\`     text                  NOT NULL,
+              \`createdAt\` bigint                NOT NULL,
+              CONSTRAINT \`AgentState_id\` PRIMARY KEY (\`id\`)
+          );
+      `);
+      //TODO: Migrations do not work well due to bun packaging. We should fix this.
+      //migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
+    },
     async storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
       const result = await db
         .insert(agentState)

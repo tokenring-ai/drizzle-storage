@@ -15,14 +15,29 @@ import {agentState} from "./schema.js";
 export const sqliteStorageConfigSchema = z.object({
   type: z.literal("sqlite"),
   databasePath: z.string(),
+  migrationsFolder: z.string().optional(),
 });
 
 export function createSQLiteStorage(config: z.infer<typeof sqliteStorageConfigSchema>): AgentCheckpointProvider {
   const sqlite = new Database(config.databasePath);
   const db = drizzleSqlite(sqlite);
-  migrateSqlite(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
+
 
   return {
+    async start() {
+      await db.run(`
+        CREATE TABLE IF NOT EXISTS \`AgentState\` (
+            \`id\`        integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            \`agentId\`   text                              NOT NULL,
+            \`config\`    text                              NOT NULL,
+            \`name\`      text                              NOT NULL,
+            \`state\`     text                              NOT NULL,
+            \`createdAt\` integer                           NOT NULL
+        );
+    `)
+      //TODO: Migrations do not work well due to bun packaging. We should fix this.
+      //migrateSqlite(db, {migrationsFolder: join(import.meta.dirname, "migrations"), });
+    },
     async storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
 
       const result = await db
