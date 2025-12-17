@@ -7,8 +7,6 @@ import {
 import Database from "bun:sqlite";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleSqlite} from "drizzle-orm/bun-sqlite";
-import {migrate as migrateSqlite} from "drizzle-orm/bun-sqlite/migrator";
-import {join} from "path";
 import {z} from "zod";
 import {agentState} from "./schema.js";
 

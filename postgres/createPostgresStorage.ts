@@ -6,8 +6,6 @@ import {
 } from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzlePostgres} from "drizzle-orm/postgres-js";
-import {migrate as migratePostgres} from "drizzle-orm/postgres-js/migrator";
-import {join} from "path";
 import postgres from "postgres";
 import {z} from "zod";
 import {agentState} from "./schema.js";

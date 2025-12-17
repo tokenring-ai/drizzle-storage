@@ -185,13 +185,13 @@ interface AgentCheckpointListItem {
 
 All database types use the same logical schema:
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Integer/BigInt | Auto-incrementing primary key |
-| `agentId` | Text | Agent identifier |
-| `name` | Text | Checkpoint name |
-| `state` | Text | JSON-serialized state data |
-| `createdAt` | Integer/BigInt | Unix timestamp |
+| Column      | Type           | Description                   |
+|-------------|----------------|-------------------------------|
+| `id`        | Integer/BigInt | Auto-incrementing primary key |
+| `agentId`   | Text           | Agent identifier              |
+| `name`      | Text           | Checkpoint name               |
+| `state`     | Text           | JSON-serialized state data    |
+| `createdAt` | Integer/BigInt | Unix timestamp                |
 
 ## Testing
 

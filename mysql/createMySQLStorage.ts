@@ -6,9 +6,7 @@ import {
 } from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleMysql} from "drizzle-orm/mysql2";
-import {migrate as migrateMysql} from "drizzle-orm/mysql2/migrator";
 import mysql from "mysql2/promise";
-import {join} from "path";
 import {z} from "zod";
 import {agentState} from "./schema.js";
 
