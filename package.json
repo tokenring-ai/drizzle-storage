@@ -13,9 +13,10 @@
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.8",
-    "vitest": "^4.0.15",
+    "vitest": "catalog:",
     "testcontainers": "^11.10.0",
-    "bun-types": "catalog:"
+    "bun-types": "catalog:",
+    "typescript": "catalog:"
   },
   "exports": {
     ".": "./index.ts",
@@ -23,11 +24,14 @@
   },
   "license": "MIT",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
     "db:generate": "bun run db:generate:sqlite && bun run db:generate:postgres && bun run db:generate:mysql",
     "db:generate:sqlite": "cd sqlite && drizzle-kit generate",
     "db:generate:postgres": "cd postgres && drizzle-kit generate",
-    "db:generate:mysql": "cd mysql && drizzle-kit generate"
+    "db:generate:mysql": "cd mysql && drizzle-kit generate",
+    "build": "tsc --noEmit",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "type": "module"
 }
