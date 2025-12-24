@@ -4,14 +4,16 @@ import {GenericContainer, StartedTestContainer} from "testcontainers";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 import {createMySQLStorage} from "./mysql/createMySQLStorage.js";
 import {createPostgresStorage} from "./postgres/createPostgresStorage.js";
-import {createSQLiteStorage} from "./sqlite/createSQLiteStorage.js";
+
+const isBun = typeof Bun !== "undefined";
 
 describe("DrizzleAgentStateStorage", () => {
-  describe("SQLite", () => {
+  describe.skipIf(!isBun)("SQLite", () => {
     const dbPath = "./test-agent-state.db";
     let storage: AgentCheckpointProvider;
 
-    beforeAll(() => {
+    beforeAll(async () => {
+      const {createSQLiteStorage} = await import("./sqlite/createSQLiteStorage.js");
       storage = createSQLiteStorage({
         type: "sqlite",
         databasePath: dbPath,
