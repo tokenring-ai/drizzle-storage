@@ -10,7 +10,7 @@ The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage
 
 - ✅ **Multi-Database Support**: SQLite, MySQL, and PostgreSQL
 - ✅ **Type Safety**: Full TypeScript support with Drizzle ORM
-- ✅ **Automatic Migrations**: Codebase-first approach with runtime migration application
+- ✅ **Automatic Table Creation**: Schema creation on initialization
 - ✅ **Production Ready**: Connection pooling for MySQL/PostgreSQL
 - ✅ **Comprehensive Testing**: Vitest with Docker containers for MySQL/PostgreSQL
 - ✅ **Token Ring Integration**: Seamless integration with Token Ring AI ecosystem
@@ -23,45 +23,11 @@ bun install @tokenring-ai/drizzle-storage
 
 ## Quick Start
 
-### 1. Generate Migrations
+### 1. Create Storage Provider
 
-After installation, generate the database migrations:
+Choose the appropriate database type for your use case:
 
-```bash
-bun run db:generate
-```
-
-### 2. Basic Usage
-
-```typescript
-import { createSQLiteStorage } from '@tokenring-ai/drizzle-storage';
-
-const storage = createSQLiteStorage({
-  type: "sqlite",
-  databasePath: "./agent_state.db"
-});
-
-// Store a checkpoint
-const checkpoint = {
-  agentId: "agent-123",
-  name: "session-1",
-  state: { messages: ["Hello"], count: 1 },
-  createdAt: Date.now()
-};
-
-const id = await storage.storeCheckpoint(checkpoint);
-
-// Retrieve a checkpoint
-const retrieved = await storage.retrieveCheckpoint(id);
-console.log(retrieved?.state); // { messages: ["Hello"], count: 1 }
-
-// List all checkpoints
-const checkpoints = await storage.listCheckpoints();
-```
-
-## Database Support
-
-### SQLite (Bun)
+#### SQLite (Bun)
 
 Perfect for development and small-scale applications:
 
@@ -74,7 +40,7 @@ const storage = createSQLiteStorage({
 });
 ```
 
-### MySQL
+#### MySQL
 
 Ideal for production environments with connection pooling:
 
@@ -87,7 +53,7 @@ const storage = createMySQLStorage({
 });
 ```
 
-### PostgreSQL
+#### PostgreSQL
 
 Enterprise-grade database with advanced features:
 
@@ -98,6 +64,32 @@ const storage = createPostgresStorage({
   type: "postgres",
   connectionString: "postgres://user:password@localhost:5432/database"
 });
+```
+
+### 2. Initialize and Use
+
+```typescript
+// Initialize the storage (creates tables if they don't exist)
+await storage.start();
+
+// Store a checkpoint
+const checkpoint = {
+  agentId: "agent-123",
+  name: "session-1", 
+  state: { messages: ["Hello"], count: 1 },
+  createdAt: Date.now()
+};
+
+const id = await storage.storeCheckpoint(checkpoint);
+console.log('Checkpoint stored with ID:', id);
+
+// Retrieve a checkpoint
+const retrieved = await storage.retrieveCheckpoint(id);
+console.log('Retrieved state:', retrieved?.state);
+
+// List all checkpoints
+const checkpoints = await storage.listCheckpoints();
+console.log('Available checkpoints:', checkpoints);
 ```
 
 ## Token Ring Configuration
@@ -127,13 +119,14 @@ export default {
 ### Factory Functions
 
 - `createSQLiteStorage(config: SQLiteConfig): AgentCheckpointProvider`
-- `createMySQLStorage(config: MySQLConfig): AgentCheckpointProvider`
+- `createMySQLStorage(config: MySQLConfig): AgentCheckpointProvider` 
 - `createPostgresStorage(config: PostgresConfig): AgentCheckpointProvider`
 
 ### AgentCheckpointProvider Interface
 
 ```typescript
 interface AgentCheckpointProvider {
+  start(): Promise<void>;
   storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string>;
   retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
   listCheckpoints(): Promise<AgentCheckpointListItem[]>;
@@ -190,6 +183,7 @@ All database types use the same logical schema:
 | `id`        | Integer/BigInt | Auto-incrementing primary key |
 | `agentId`   | Text           | Agent identifier              |
 | `name`      | Text           | Checkpoint name               |
+| `config`    | Text           | JSON-serialized configuration data |
 | `state`     | Text           | JSON-serialized state data    |
 | `createdAt` | Integer/BigInt | Unix timestamp                |
 
@@ -215,9 +209,7 @@ bun run test
 ### Scripts
 
 - `bun run test` - Run test suite
-- `bun run db:generate` - Generate database migrations
-- `bun run db:generate:mysql` - Generate MySQL migrations only
-- `bun run db:generate:postgres` - Generate PostgreSQL migrations only
+- `bun run db:generate` - Generate database migrations (note: migrations are not automatically applied)
 
 ### Project Structure
 
@@ -247,6 +239,7 @@ pkg/drizzle-storage/
 ### Runtime Dependencies
 
 - `@tokenring-ai/chat` - Token Ring AI integration
+- `@tokenring-ai/checkpoint` - Checkpoint provider interface
 - `drizzle-orm` - Type-safe ORM
 - `mysql2` - MySQL driver
 - `postgres` - PostgreSQL driver
@@ -264,8 +257,8 @@ This package uses Drizzle's codebase-first approach:
 
 1. **Define Schema**: Schema is defined in TypeScript files
 2. **Generate Migrations**: Run `bun run db:generate` to create SQL files
-3. **Apply Migrations**: Migrations are automatically applied on initialization
-4. **Track State**: Drizzle maintains migration history in the database
+3. **Apply Tables**: Tables are automatically created on initialization with `start()` method
+4. **Note**: Migrations are not automatically applied due to Bun packaging constraints
 
 ## Error Handling
 
@@ -274,7 +267,7 @@ The package includes comprehensive error handling:
 - Database connection errors
 - Invalid checkpoint data
 - Non-existent checkpoint retrieval
-- Migration application failures
+- Migration application failures (not automatically applied)
 
 ## Performance Considerations
 
@@ -296,10 +289,18 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Changelog
 
+### v0.2.0
+
+- Added explicit `start()` method for table creation
+- Enhanced configuration schemas for each database type
+- Improved test coverage with Docker containers
+- Updated API documentation
+- Added configuration examples for Token Ring integration
+
 ### v0.1.0
 
 - Initial release with multi-database support
 - SQLite, MySQL, and PostgreSQL implementations
 - Comprehensive test suite with Docker containers
 - Token Ring AI integration
-- Automatic migration management
+- Automatic table creation on initialization
