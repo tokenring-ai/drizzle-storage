@@ -12,7 +12,7 @@ The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage
 - ✅ **Type Safety**: Full TypeScript support with Drizzle ORM
 - ✅ **Automatic Table Creation**: Schema creation on initialization
 - ✅ **Production Ready**: Connection pooling for MySQL/PostgreSQL
-- ✅ **Comprehensive Testing**: Vitest with Docker containers for MySQL/PostgreSQL
+- ✅ **Comprehensive Testing**: Vitest with Docker containers
 - ✅ **Token Ring Integration**: Seamless integration with Token Ring AI ecosystem
 
 ## Installation
@@ -139,6 +139,7 @@ interface AgentCheckpointProvider {
 interface SQLiteConfig {
   type: "sqlite";
   databasePath: string;
+  migrationsFolder?: string;
 }
 
 interface MySQLConfig {
@@ -286,21 +287,3 @@ The package includes comprehensive error handling:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
-## Changelog
-
-### v0.2.0
-
-- Added explicit `start()` method for table creation
-- Enhanced configuration schemas for each database type
-- Improved test coverage with Docker containers
-- Updated API documentation
-- Added configuration examples for Token Ring integration
-
-### v0.1.0
-
-- Initial release with multi-database support
-- SQLite, MySQL, and PostgreSQL implementations
-- Comprehensive test suite with Docker containers
-- Token Ring AI integration
-- Automatic table creation on initialization
