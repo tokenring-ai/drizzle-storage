@@ -16,7 +16,6 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    // const config = app.getConfigSlice("checkpoint", CheckpointPluginConfigSchema);
 
     if (config.checkpoint) {
       app.services
