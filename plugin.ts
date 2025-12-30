@@ -1,6 +1,6 @@
 import {TokenRingPlugin} from "@tokenring-ai/app";
-import {CheckpointPluginConfigSchema} from "@tokenring-ai/checkpoint";
 import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
+import {CheckpointConfigSchema} from "@tokenring-ai/checkpoint/schema";
 import {z} from "zod";
 import {createMySQLStorage, mysqlStorageConfigSchema} from "./mysql/createMySQLStorage.js";
 import packageJSON from "./package.json" with {type: "json"};
@@ -8,7 +8,7 @@ import {createPostgresStorage, postgresStorageConfigSchema} from "./postgres/cre
 import {createSQLiteStorage, sqliteStorageConfigSchema} from "./sqlite/createSQLiteStorage.js";
 
 const packageConfigSchema = z.object({
-  checkpoint: CheckpointPluginConfigSchema.optional(),
+  checkpoint: CheckpointConfigSchema.optional(),
 })
 
 export default {
@@ -16,28 +16,23 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-
     if (config.checkpoint) {
       app.services
         .waitForItemByType(AgentCheckpointService, (checkpointService) => {
-          for (const name in config.checkpoint!.providers) {
-            const provider = config.checkpoint!.providers[name];
-            if (provider.type === "sqlite") {
-              checkpointService.registerProvider(
-                name,
-                createSQLiteStorage(sqliteStorageConfigSchema.parse(provider))
-              );
-            } else if (provider.type === "mysql") {
-              checkpointService.registerProvider(
-                name,
-                createMySQLStorage(mysqlStorageConfigSchema.parse(provider))
-              );
-            } else if (provider.type === "postgres") {
-              checkpointService.registerProvider(
-                name,
-                createPostgresStorage(postgresStorageConfigSchema.parse(provider))
-              )
-            }
+          const provider = config.checkpoint!.provider;
+
+          if (provider.type === "sqlite") {
+            checkpointService.setCheckpointProvider(
+              createSQLiteStorage(sqliteStorageConfigSchema.parse(provider))
+            );
+          } else if (provider.type === "mysql") {
+            checkpointService.setCheckpointProvider(
+              createMySQLStorage(mysqlStorageConfigSchema.parse(provider))
+            );
+          } else if (provider.type === "postgres") {
+            checkpointService.setCheckpointProvider(
+              createPostgresStorage(postgresStorageConfigSchema.parse(provider))
+            )
           }
         });
     }
