@@ -8,12 +8,11 @@ The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage
 
 ### Key Features
 
-- ✅ **Multi-Database Support**: SQLite, MySQL, and PostgreSQL
-- ✅ **Type Safety**: Full TypeScript support with Drizzle ORM
-- ✅ **Automatic Table Creation**: Schema creation on initialization
-- ✅ **Production Ready**: Connection pooling for MySQL/PostgreSQL
-- ✅ **Comprehensive Testing**: Vitest with Docker containers
-- ✅ **Token Ring Integration**: Seamless integration with Token Ring AI ecosystem
+- **Multi-Database Support**: SQLite, MySQL, and PostgreSQL
+- **Type Safety**: Full TypeScript support with Drizzle ORM
+- **Automatic Table Creation**: Schema creation on initialization
+- **Production Ready**: Connection pooling for MySQL/PostgreSQL
+- **Comprehensive Testing**: Vitest with Docker containers for MySQL and PostgreSQL
 
 ## Installation
 
@@ -92,7 +91,7 @@ const checkpoints = await storage.listCheckpoints();
 console.log('Available checkpoints:', checkpoints);
 ```
 
-## Token Ring Configuration
+## Plugin Configuration
 
 Configure the storage provider in your Token Ring configuration:
 
@@ -100,18 +99,50 @@ Configure the storage provider in your Token Ring configuration:
 // .tokenring/coder-config.mjs
 export default {
   checkpoint: {
-    providers: {
-      main: {
-        type: "postgres",
-        connectionString: process.env.DATABASE_URL
-      },
-      backup: {
-        type: "sqlite",
-        databasePath: "./backup_agent_state.db"
-      }
+    provider: {
+      type: "postgres",
+      connectionString: process.env.DATABASE_URL
     }
   }
 };
+```
+
+### Configuration Schema
+
+The package uses Zod schemas for configuration validation:
+
+```typescript
+const packageConfigSchema = z.object({
+  checkpoint: CheckpointConfigSchema.optional(),
+})
+```
+
+#### SQLite Config Schema
+
+```typescript
+const sqliteStorageConfigSchema = z.object({
+  type: z.literal("sqlite"),
+  databasePath: z.string(),
+  migrationsFolder: z.string().optional(),
+});
+```
+
+#### MySQL Config Schema
+
+```typescript
+const mysqlStorageConfigSchema = z.object({
+  type: z.literal("mysql"),
+  connectionString: z.string(),
+});
+```
+
+#### PostgreSQL Config Schema
+
+```typescript
+const postgresStorageConfigSchema = z.object({
+  type: z.literal("postgres"),
+  connectionString: z.string(),
+});
 ```
 
 ## API Reference
@@ -119,37 +150,17 @@ export default {
 ### Factory Functions
 
 - `createSQLiteStorage(config: SQLiteConfig): AgentCheckpointProvider`
-- `createMySQLStorage(config: MySQLConfig): AgentCheckpointProvider` 
+- `createMySQLStorage(config: MySQLConfig): AgentCheckpointProvider`
 - `createPostgresStorage(config: PostgresConfig): AgentCheckpointProvider`
 
 ### AgentCheckpointProvider Interface
 
 ```typescript
 interface AgentCheckpointProvider {
-  start(): Promise<void>;
-  storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string>;
+  start?(): Promise<void>;
+  storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
   retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
   listCheckpoints(): Promise<AgentCheckpointListItem[]>;
-}
-```
-
-### Configuration Types
-
-```typescript
-interface SQLiteConfig {
-  type: "sqlite";
-  databasePath: string;
-  migrationsFolder?: string;
-}
-
-interface MySQLConfig {
-  type: "mysql";
-  connectionString: string;
-}
-
-interface PostgresConfig {
-  type: "postgres";
-  connectionString: string;
 }
 ```
 
@@ -160,6 +171,7 @@ interface NamedAgentCheckpoint {
   agentId: string;
   name: string;
   state: any;
+  config?: any;
   createdAt: number;
 }
 
@@ -198,52 +210,41 @@ bun run test
 
 ### Test Coverage
 
-- ✅ SQLite: Local file-based database
-- ✅ MySQL: Docker container (mysql:8.0)
-- ✅ PostgreSQL: Docker container (postgres:16)
-- ✅ CRUD operations for all database types
-- ✅ Error handling and edge cases
-- ✅ Connection management
+- **SQLite**: Local file-based database (skipped in non-Bun environments)
+- **MySQL**: Docker container (mysql:8.0)
+- **PostgreSQL**: Docker container (postgres:16)
+- CRUD operations for all database types
+- Error handling and edge cases
+- Connection management
 
-## Development
-
-### Scripts
-
-- `bun run test` - Run test suite
-- `bun run db:generate` - Generate database migrations (note: migrations are not automatically applied)
-
-### Project Structure
+## Project Structure
 
 ```
 pkg/drizzle-storage/
-├── index.ts                    # Package entry point and Token Ring integration
+├── index.ts                    # Package entry point
+├── plugin.ts                   # TokenRingPlugin implementation
+├── package.json                # Dependencies and scripts
+├── README.md                   # Documentation
+├── IMPLEMENTATION.md           # Implementation details
+├── LICENSE                     # MIT License
+├── DrizzleAgentStateStorage.test.ts  # Test suite
+├── vitest.config.ts            # Test configuration
 ├── sqlite/                     # SQLite implementation
 │   ├── createSQLiteStorage.ts  # Factory function
 │   ├── schema.ts              # Drizzle schema
-│   └── migrations/            # Generated migrations
+│   ├── drizzle.config.ts      # Drizzle configuration
+│   └── migrations/            # Migration files
 ├── mysql/                      # MySQL implementation
 │   ├── createMySQLStorage.ts  # Factory function
 │   ├── schema.ts              # Drizzle schema
-│   └── migrations/            # Generated migrations
-├── postgres/                   # PostgreSQL implementation
-│   ├── createPostgresStorage.ts # Factory function
-│   ├── schema.ts              # Drizzle schema
-│   └── migrations/            # Generated migrations
-├── DrizzleAgentStateStorage.test.ts # Test suite
-├── vitest.config.ts           # Test configuration
-├── package.json               # Dependencies and scripts
-└── README.md                  # This documentation
+│   ├── drizzle.config.ts      # Drizzle configuration
+│   └── migrations/            # Migration files
+└── postgres/                   # PostgreSQL implementation
+    ├── createPostgresStorage.ts # Factory function
+    ├── schema.ts              # Drizzle schema
+    ├── drizzle.config.ts      # Drizzle configuration
+    └── migrations/            # Migration files
 ```
-
-## Dependencies
-
-### Runtime Dependencies
-
-- `@tokenring-ai/chat` - Token Ring AI integration
-- `@tokenring-ai/checkpoint` - Checkpoint provider interface
-- `drizzle-orm` - Type-safe ORM
-- `mysql2` - MySQL driver
-- `postgres` - PostgreSQL driver
 
 ### Development Dependencies
 
@@ -251,13 +252,14 @@ pkg/drizzle-storage/
 - `vitest` - Testing framework
 - `testcontainers` - Docker container management
 - `bun-types` - TypeScript definitions for Bun
+- `typescript` - TypeScript compiler
 
 ## Migration Strategy
 
 This package uses Drizzle's codebase-first approach:
 
-1. **Define Schema**: Schema is defined in TypeScript files
-2. **Generate Migrations**: Run `bun run db:generate` to create SQL files
+1. **Define Schema**: Schema is defined in TypeScript files for each database type
+2. **Generate Migrations**: Run `bun run db:generate` to create SQL files for each database
 3. **Apply Tables**: Tables are automatically created on initialization with `start()` method
 4. **Note**: Migrations are not automatically applied due to Bun packaging constraints
 
@@ -286,4 +288,4 @@ The package includes comprehensive error handling:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](./LICENSE) file for details.
