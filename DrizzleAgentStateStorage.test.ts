@@ -4,6 +4,7 @@ import {GenericContainer, StartedTestContainer} from "testcontainers";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 import {createMySQLStorage} from "./mysql/createMySQLStorage.js";
 import {createPostgresStorage} from "./postgres/createPostgresStorage.js";
+import {setTimeout} from "timers/promises";
 
 const isBun = typeof Bun !== "undefined";
 
@@ -90,6 +91,9 @@ describe("DrizzleAgentStateStorage", () => {
       const checkpoint: NamedAgentCheckpoint = {
         agentId: "test-agent-mysql",
         name: "session-mysql",
+        config: {
+          foo: "bar"
+        },
         state: {agentState: {messages: {hello: "mysql"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
         createdAt: Date.now(),
       };
@@ -122,6 +126,8 @@ describe("DrizzleAgentStateStorage", () => {
         .withExposedPorts(5432)
         .start();
 
+      await setTimeout(1000);
+
       const port = container.getMappedPort(5432);
       const connectionString = `postgres://postgres:test@localhost:${port}/testdb`;
 
@@ -139,6 +145,7 @@ describe("DrizzleAgentStateStorage", () => {
       const checkpoint: NamedAgentCheckpoint = {
         agentId: "test-agent-pg",
         name: "session-pg",
+        config: {},
         state: {agentState: {messages: {hello: "postgres"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
         createdAt: Date.now(),
       };
