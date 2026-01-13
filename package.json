@@ -9,12 +9,12 @@
     "zod": "catalog:",
     "drizzle-orm": "^0.45.1",
     "mysql2": "^3.16.0",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.8"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.8",
     "vitest": "catalog:",
-    "testcontainers": "^11.10.0",
+    "testcontainers": "^11.11.0",
     "bun-types": "catalog:",
     "typescript": "catalog:"
   },
