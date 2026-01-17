@@ -1,9 +1,4 @@
-import {
-  AgentCheckpointListItem,
-  AgentCheckpointProvider,
-  NamedAgentCheckpoint,
-  StoredAgentCheckpoint
-} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
+import {AgentCheckpointListItem, AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleMysql} from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";

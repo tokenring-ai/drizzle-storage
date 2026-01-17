@@ -1,9 +1,4 @@
-import {
-  AgentCheckpointListItem,
-  AgentCheckpointProvider,
-  NamedAgentCheckpoint,
-  StoredAgentCheckpoint
-} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
+import {AgentCheckpointListItem, AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
 import Database from "bun:sqlite";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleSqlite} from "drizzle-orm/bun-sqlite";
@@ -23,7 +18,7 @@ export function createSQLiteStorage(config: z.infer<typeof sqliteStorageConfigSc
 
   return {
     async start() {
-      await db.run(`
+      db.run(`
         CREATE TABLE IF NOT EXISTS \`AgentState\` (
             \`id\`        integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             \`agentId\`   text                              NOT NULL,

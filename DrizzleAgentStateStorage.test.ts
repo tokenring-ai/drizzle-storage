@@ -1,10 +1,10 @@
 import {AgentCheckpointProvider, NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
 import {unlinkSync} from "fs";
 import {GenericContainer, StartedTestContainer} from "testcontainers";
+import {setTimeout} from "timers/promises";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 import {createMySQLStorage} from "./mysql/createMySQLStorage.js";
 import {createPostgresStorage} from "./postgres/createPostgresStorage.js";
-import {setTimeout} from "timers/promises";
 
 const isBun = typeof Bun !== "undefined";
 
