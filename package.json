@@ -8,7 +8,7 @@
     "@tokenring-ai/checkpoint": "0.2.0",
     "zod": "catalog:",
     "drizzle-orm": "^0.45.1",
-    "mysql2": "^3.16.0",
+    "mysql2": "^3.16.2",
     "postgres": "^3.4.8"
   },
   "devDependencies": {
