@@ -199,6 +199,22 @@ const postgresStorageConfigSchema = z.object({
 
 ## API Reference
 
+### Package Exports
+
+The package provides factory functions and configuration schemas:
+
+```typescript
+// Factory functions
+createSQLiteStorage(config: z.infer<typeof sqliteStorageConfigSchema>): AgentCheckpointProvider
+createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSchema>): AgentCheckpointProvider
+createPostgresStorage(config: z.infer<typeof postgresStorageConfigSchema>): AgentCheckpointProvider
+
+// Configuration schemas
+sqliteStorageConfigSchema
+mysqlStorageConfigSchema
+postgresStorageConfigSchema
+```
+
 ### Factory Functions
 
 ```typescript
@@ -273,7 +289,7 @@ export const agentState = sqliteTable("AgentState", {
   name: text("name").notNull(),
   config: text("config").notNull(),
   state: text("state").notNull(),
-  createdAt: integer("createdAt").notNull,
+  createdAt: integer("createdAt").notNull(),
 });
 ```
 
@@ -282,7 +298,14 @@ export const agentState = sqliteTable("AgentState", {
 Run the comprehensive test suite with Docker containers:
 
 ```bash
-bun run test
+# Run all tests
+bun test
+
+# Run tests in watch mode
+bun test --watch
+
+# Run tests with coverage
+bun test --coverage
 ```
 
 ### Test Coverage
@@ -345,14 +368,17 @@ pkg/drizzle-storage/
 │   ├── createSQLiteStorage.ts  # Factory function
 │   ├── schema.ts              # Drizzle schema
 │   └── drizzle.config.ts      # Drizzle configuration
+│   └── migrations/            # Database migrations
 ├── mysql/                      # MySQL implementation
 │   ├── createMySQLStorage.ts  # Factory function
 │   ├── schema.ts              # Drizzle schema
 │   └── drizzle.config.ts      # Drizzle configuration
+│   └── migrations/            # Database migrations
 └── postgres/                   # PostgreSQL implementation
     ├── createPostgresStorage.ts # Factory function
     ├── schema.ts              # Drizzle schema
     └── drizzle.config.ts      # Drizzle configuration
+    └── migrations/            # Database migrations
 ```
 
 ## Dependencies
@@ -397,6 +423,85 @@ The package includes comprehensive error handling:
 - **SQLite**: Single-file database, ideal for development and small-scale applications
 - **MySQL**: Connection pooling for high-performance applications
 - **PostgreSQL**: Advanced features for enterprise workloads with connection pooling
+
+## Usage Examples
+
+### Direct Usage
+
+```typescript
+import { createSQLiteStorage } from '@tokenring-ai/drizzle-storage';
+
+const storage = createSQLiteStorage({
+  type: "sqlite",
+  databasePath: "./agent_state.db"
+});
+
+await storage.start();
+
+// Store a checkpoint
+const checkpoint = {
+  agentId: "agent-123",
+  name: "session-1",
+  state: { messages: ["Hello"], count: 1 },
+  config: { customConfig: "value" },
+  createdAt: Date.now()
+};
+
+const id = await storage.storeCheckpoint(checkpoint);
+console.log('Checkpoint stored with ID:', id);
+```
+
+### Using the Plugin
+
+```typescript
+// .tokenring/coder-config.mjs
+export default {
+  checkpoint: {
+    provider: {
+      type: "sqlite",
+      databasePath: "./agent_state.db"
+    }
+  }
+};
+```
+
+### List Checkpoints
+
+```typescript
+const checkpoints = await storage.listCheckpoints();
+for (const checkpoint of checkpoints) {
+  console.log(`${checkpoint.name} (${checkpoint.agentId}): ${checkpoint.id}`);
+}
+```
+
+### Handle Non-existent Checkpoints
+
+```typescript
+const retrieved = await storage.retrieveCheckpoint("999999");
+if (retrieved === null) {
+  console.log('Checkpoint not found');
+}
+```
+
+## Development
+
+### Generating Migrations
+
+```bash
+# Generate migrations for all database types
+bun run db:generate
+
+# Generate migrations for specific database
+bun run db:generate:sqlite
+bun run db:generate:postgres
+bun run db:generate:mysql
+```
+
+### Building
+
+```bash
+bun run build
+```
 
 ## Contributing
 
