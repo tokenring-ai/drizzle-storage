@@ -8,14 +8,14 @@
     "@tokenring-ai/checkpoint": "0.2.0",
     "zod": "^4.3.6",
     "drizzle-orm": "^0.45.1",
-    "mysql2": "^3.16.2",
+    "mysql2": "^3.17.2",
     "postgres": "^3.4.8"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.8",
+    "drizzle-kit": "^0.31.9",
     "vitest": "^4.0.18",
-    "testcontainers": "^11.11.0",
-    "bun-types": "^1.3.8",
+    "testcontainers": "^11.12.0",
+    "bun-types": "^1.3.9",
     "typescript": "^5.9.3"
   },
   "exports": {
