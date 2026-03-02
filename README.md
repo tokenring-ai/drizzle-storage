@@ -4,13 +4,13 @@ A multi-database storage solution for Token Ring AI agent state checkpoints usin
 
 ## Overview
 
-The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage backend for managing agent state checkpoints across multiple database systems. It implements the `AgentCheckpointProvider` interface with support for SQLite (Bun), MySQL, and PostgreSQL databases using Drizzle ORM for type-safe operations and automatic table creation.
+The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage backend for managing agent state checkpoints across multiple database systems. It implements the `AgentCheckpointProvider` interface with support for SQLite (Bun), MySQL, and PostgreSQL databases using Drizzle ORM for type-safe operations.
 
 ### Key Features
 
 - **Multi-Database Support**: SQLite (Bun), MySQL, and PostgreSQL
 - **Type Safety**: Full TypeScript support with Drizzle ORM
-- **Automatic Table Creation**: Schema creation on initialization
+- **Automatic Table Creation**: Schema creation on initialization via `start()` method
 - **Connection Pooling**: Built-in pooling for MySQL and PostgreSQL
 - **Token Ring Plugin**: Seamless integration via Token Ring's plugin system
 - **JSON State Management**: Automatic JSON serialization/deserialization
@@ -227,8 +227,8 @@ createPostgresStorage(config: PostgresConfig): AgentCheckpointProvider
 
 ```typescript
 interface AgentCheckpointProvider {
-  start(): Promise<void>;
-  storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string>;
+  start?(): Promise<void>;
+  storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
   retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
   listCheckpoints(): Promise<AgentCheckpointListItem[]>;
 }
@@ -338,7 +338,7 @@ describe("DrizzleAgentStateStorage", () => {
     const checkpoint: NamedAgentCheckpoint = {
       agentId: "test-agent-1",
       name: "session-1",
-      state: {agentState: {messages: {hello: "world"}}, toolsEnabled: ["foo"]},
+      state: {agentState: {messages: {hello: "world"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
       createdAt: Date.now(),
     };
 
@@ -366,19 +366,16 @@ pkg/drizzle-storage/
 ├── LICENSE                     # MIT License
 ├── sqlite/                     # SQLite implementation
 │   ├── createSQLiteStorage.ts  # Factory function
-│   ├── schema.ts              # Drizzle schema
-│   └── drizzle.config.ts      # Drizzle configuration
-│   └── migrations/            # Database migrations
+│   ├── schema.ts               # Drizzle schema
+│   └── drizzle.config.ts       # Drizzle configuration
 ├── mysql/                      # MySQL implementation
-│   ├── createMySQLStorage.ts  # Factory function
-│   ├── schema.ts              # Drizzle schema
-│   └── drizzle.config.ts      # Drizzle configuration
-│   └── migrations/            # Database migrations
+│   ├── createMySQLStorage.ts   # Factory function
+│   ├── schema.ts               # Drizzle schema
+│   └── drizzle.config.ts       # Drizzle configuration
 └── postgres/                   # PostgreSQL implementation
     ├── createPostgresStorage.ts # Factory function
-    ├── schema.ts              # Drizzle schema
-    └── drizzle.config.ts      # Drizzle configuration
-    └── migrations/            # Database migrations
+    ├── schema.ts               # Drizzle schema
+    └── drizzle.config.ts       # Drizzle configuration
 ```
 
 ## Dependencies
@@ -389,8 +386,8 @@ pkg/drizzle-storage/
 - `mysql2`: MySQL driver with connection pooling
 - `postgres`: PostgreSQL driver with connection pooling
 - `zod`: Schema validation
-- `@tokenring-ai/checkpoint`: Token Ring checkpoint interface
 - `@tokenring-ai/app`: Token Ring application framework
+- `@tokenring-ai/checkpoint`: Token Ring checkpoint interface
 - `bun:sqlite`: Bun's built-in SQLite driver (for SQLite only)
 
 ### Development Dependencies
@@ -403,11 +400,11 @@ pkg/drizzle-storage/
 
 ## Migration Strategy
 
-This package uses Drizzle's codebase-first approach:
+This package uses Drizzle's codebase-first approach with runtime table creation:
 
 1. **Define Schema**: Schema is defined in TypeScript files for each database type (`sqlite/schema.ts`, `mysql/schema.ts`, `postgres/schema.ts`)
 2. **Create Tables**: Tables are automatically created at runtime when the `start()` method is called using `CREATE TABLE IF NOT EXISTS` statements
-3. **Note**: Migrations are not automatically applied via Drizzle's migration system due to Bun packaging constraints. The `start()` method creates tables directly.
+3. **Note**: Drizzle migrations are not automatically applied via the migration system due to Bun packaging constraints. The `start()` method creates tables directly.
 
 ## Error Handling
 
@@ -415,7 +412,7 @@ The package includes comprehensive error handling:
 
 - Database connection errors
 - Invalid checkpoint data
-- Non-existent checkpoint retrieval
+- Non-existent checkpoint retrieval (returns `null`)
 - JSON parsing errors for state and config
 
 ## Performance Considerations
@@ -453,7 +450,7 @@ console.log('Checkpoint stored with ID:', id);
 
 ### Using the Plugin
 
-```typescript
+```javascript
 // .tokenring/coder-config.mjs
 export default {
   checkpoint: {
