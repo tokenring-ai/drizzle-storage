@@ -19,6 +19,6 @@
  * ```
  */
 
-export { createSQLiteStorage, sqliteStorageConfigSchema } from './sqlite/createSQLiteStorage.js';
-export { createMySQLStorage, mysqlStorageConfigSchema } from './mysql/createMySQLStorage.js';
-export { createPostgresStorage, postgresStorageConfigSchema } from './postgres/createPostgresStorage.js';
+export { SQLiteStorage, sqliteStorageConfigSchema } from './sqlite/createSQLiteStorage.js';
+export { MySQLStorage, mysqlStorageConfigSchema } from './mysql/createMySQLStorage.js';
+export { PostgresStorage, postgresStorageConfigSchema } from './postgres/createPostgresStorage.js';

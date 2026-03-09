@@ -1,4 +1,4 @@
-import {AgentCheckpointProvider, NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
+import {AgentCheckpointStorage, NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 import {unlinkSync} from "fs";
 import {GenericContainer, StartedTestContainer} from "testcontainers";
 import {setTimeout} from "timers/promises";
@@ -11,7 +11,7 @@ const isBun = typeof Bun !== "undefined";
 describe("DrizzleAgentStateStorage", () => {
   describe.skipIf(!isBun)("SQLite", () => {
     const dbPath = "./test-agent-state.db";
-    let storage: AgentCheckpointProvider;
+    let storage: AgentCheckpointStorage;
 
     beforeAll(async () => {
       const {createSQLiteStorage} = await import("./sqlite/createSQLiteStorage.js");
@@ -36,10 +36,10 @@ describe("DrizzleAgentStateStorage", () => {
         createdAt: Date.now(),
       };
 
-      const id = await storage.storeCheckpoint(checkpoint);
+      const id = await storage.storeAgentCheckpoint(checkpoint);
       expect(id).toBeDefined();
 
-      const retrieved = await storage.retrieveCheckpoint(id);
+      const retrieved = await storage.retrieveAgentCheckpoint(id);
       expect(retrieved).toBeDefined();
       expect(retrieved?.agentId).toBe(checkpoint.agentId);
       expect(retrieved?.name).toBe(checkpoint.name);
@@ -47,7 +47,7 @@ describe("DrizzleAgentStateStorage", () => {
     });
 
     it("should list checkpoints", async () => {
-      const list = await storage.listCheckpoints();
+      const list = await storage.listAgentCheckpoints();
       expect(list.length).toBeGreaterThan(0);
       expect(list[0]).toHaveProperty("id");
       expect(list[0]).toHaveProperty("name");
@@ -56,14 +56,14 @@ describe("DrizzleAgentStateStorage", () => {
     });
 
     it("should return null for non-existent checkpoint", async () => {
-      const retrieved = await storage.retrieveCheckpoint("999999");
+      const retrieved = await storage.retrieveAgentCheckpoint("999999");
       expect(retrieved).toBeNull();
     });
   });
 
   describe("MySQL", () => {
     let container: StartedTestContainer;
-    let storage: AgentCheckpointProvider;
+    let storage: AgentCheckpointStorage;
 
     beforeAll(async () => {
       container = await new GenericContainer("mysql:8.0")
@@ -98,24 +98,24 @@ describe("DrizzleAgentStateStorage", () => {
         createdAt: Date.now(),
       };
 
-      const id = await storage.storeCheckpoint(checkpoint);
+      const id = await storage.storeAgentCheckpoint(checkpoint);
       expect(id).toBeDefined();
 
-      const retrieved = await storage.retrieveCheckpoint(id);
+      const retrieved = await storage.retrieveAgentCheckpoint(id);
       expect(retrieved).toBeDefined();
       expect(retrieved?.agentId).toBe(checkpoint.agentId);
       expect(retrieved?.state).toEqual(checkpoint.state);
     });
 
     it("should list checkpoints", async () => {
-      const list = await storage.listCheckpoints();
+      const list = await storage.listAgentCheckpoints();
       expect(list.length).toBeGreaterThan(0);
     });
   });
 
   describe("Postgres", () => {
     let container: StartedTestContainer;
-    let storage: AgentCheckpointProvider;
+    let storage: AgentCheckpointStorage;
 
     beforeAll(async () => {
       container = await new GenericContainer("postgres:16")
@@ -150,17 +150,17 @@ describe("DrizzleAgentStateStorage", () => {
         createdAt: Date.now(),
       };
 
-      const id = await storage.storeCheckpoint(checkpoint);
+      const id = await storage.storeAgentCheckpoint(checkpoint);
       expect(id).toBeDefined();
 
-      const retrieved = await storage.retrieveCheckpoint(id);
+      const retrieved = await storage.retrieveAgentCheckpoint(id);
       expect(retrieved).toBeDefined();
       expect(retrieved?.agentId).toBe(checkpoint.agentId);
       expect(retrieved?.state).toEqual(checkpoint.state);
     });
 
     it("should list checkpoints", async () => {
-      const list = await storage.listCheckpoints();
+      const list = await storage.listAgentCheckpoints();
       expect(list.length).toBeGreaterThan(0);
     });
   });

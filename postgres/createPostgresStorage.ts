@@ -1,85 +1,178 @@
-import {AgentCheckpointListItem, AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
+import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
+import {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzlePostgres} from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import {z} from "zod";
-import {agentState} from "./schema.js";
+import {agentCheckpoints, appCheckpoints} from "./schema.js";
 
 export const postgresStorageConfigSchema = z.object({
   type: z.literal("postgres"),
   connectionString: z.string(),
 });
 
-export function createPostgresStorage(config: z.infer<typeof postgresStorageConfigSchema>): AgentCheckpointProvider {
-  const connection = postgres(config.connectionString);
-  const db = drizzlePostgres(connection);
+export class PostgresStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+  name = "PostgresStorage";
+  description = "PostgreSQL storage provider";
 
-  return {
-    async start() {
-      await db.execute(`
-        CREATE TABLE IF NOT EXISTS "AgentState" (
-         "id" bigserial PRIMARY KEY NOT NULL,
-         "agentId"   text   NOT NULL,
-         "name"      text   NOT NULL,
-         "config"    text   NOT NULL,
-         "state"     text   NOT NULL,
-         "createdAt" bigint NOT NULL
+  connection: postgres.Sql;
+  db: ReturnType<typeof drizzlePostgres>;
+  displayName: string;
+
+  constructor(private readonly config: z.infer<typeof postgresStorageConfigSchema>) {
+    const url = new URL(config.connectionString);
+    url.password = '***';
+
+    this.connection = postgres(config.connectionString);
+    this.db = drizzlePostgres(this.connection);
+
+    this.displayName = `Postgres (${url.toString()}`;
+  }
+
+  async start() {
+    await this.db.execute(`
+        CREATE TABLE IF NOT EXISTS "AgentCheckpoints"
+        (
+            "id"        bigserial PRIMARY KEY NOT NULL,
+            "sessionId" text                  NOT NULL,
+            "agentId"   text                  NOT NULL,
+            "name"      text                  NOT NULL,
+            "agentType" text                  NOT NULL,
+            "config"    text                  NOT NULL,
+            "state"     text                  NOT NULL,
+            "createdAt" bigint                NOT NULL
         );
-     `);
-      //TODO: Migrations do not work well due to bun packaging. We should fix this.
-      //migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
+    `);
+    //TODO: Migrations do not work well due to bun packaging. We should fix this.
+    //migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
+  }
 
-    },
-    async storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
-
-      const result = await db
-        .insert(agentState)
-        .values({
-          agentId: checkpoint.agentId,
-          name: checkpoint.name,
-          config: JSON.stringify(checkpoint.config),
-          state: JSON.stringify(checkpoint.state),
-          createdAt: checkpoint.createdAt,
-        })
-        .returning({id: agentState.id});
-      return result[0].id.toString();
-    },
-
-    async retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
-      let result = await db.select()
-        .from(agentState)
-        .where(eq(agentState.id, Number(id)))
-        .limit(1);
-
-      if (result.length === 0) return null;
-
-      const row = result[0];
-      return {
-        id: row.id.toString(),
-        name: row.name,
-        agentId: row.agentId,
-        config: JSON.parse(row.config),
-        state: JSON.parse(row.state),
-        createdAt: Number(row.createdAt),
-      };
-    },
-
-    async listCheckpoints(): Promise<AgentCheckpointListItem[]> {
-      let result = await db.select({
-        id: agentState.id,
-        name: agentState.name,
-        agentId: agentState.agentId,
-        createdAt: agentState.createdAt,
+  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
+    const result = await this.db
+      .insert(agentCheckpoints)
+      .values({
+        agentId: checkpoint.agentId,
+        sessionId: checkpoint.sessionId,
+        name: checkpoint.name,
+        agentType: checkpoint.agentType,
+        state: JSON.stringify(checkpoint.state),
+        createdAt: checkpoint.createdAt,
       })
-        .from(agentState)
-        .orderBy(desc(agentState.createdAt));
+      .returning({id: agentCheckpoints.id});
+    return result[0].id.toString();
+  }
 
-      return result.map(row => ({
-        id: row.id.toString(),
-        name: row.name,
-        agentId: row.agentId,
-        createdAt: Number(row.createdAt),
-      }));
-    }
+  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
+    let result = await this.db.select()
+      .from(agentCheckpoints)
+      .where(eq(agentCheckpoints.id, Number(id)))
+      .limit(1);
+
+    if (result.length === 0) return null;
+
+    const row = result[0];
+    return {
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      name: row.name,
+      agentId: row.agentId,
+      agentType: row.agentType,
+      state: JSON.parse(row.state),
+      createdAt: Number(row.createdAt),
+    };
+  }
+
+  async listAgentCheckpoints(): Promise<AgentCheckpointListItem[]> {
+    let result = await this.db.select({
+      id: agentCheckpoints.id,
+      sessionId: agentCheckpoints.sessionId,
+      name: agentCheckpoints.name,
+      agentId: agentCheckpoints.agentId,
+      agentType: agentCheckpoints.agentType,
+      createdAt: agentCheckpoints.createdAt,
+    })
+      .from(agentCheckpoints)
+      .orderBy(desc(agentCheckpoints.createdAt));
+
+    return result.map(row => ({
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      name: row.name,
+      agentId: row.agentId,
+      agentType: row.agentType,
+      createdAt: Number(row.createdAt),
+    }));
+  }
+
+  async storeAppCheckpoint(checkpoint: AppSessionCheckpoint): Promise<string> {
+    const result = await this.db
+      .insert(appCheckpoints)
+      .values({
+        sessionId: checkpoint.sessionId,
+        hostname: checkpoint.hostname,
+        workingDirectory: checkpoint.workingDirectory,
+        state: JSON.stringify(checkpoint.state),
+        createdAt: checkpoint.createdAt,
+      })
+      .returning({id: appCheckpoints.id});
+    return result[0].id.toString();
+  }
+
+  async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
+    let result = await this.db.select()
+      .from(appCheckpoints)
+      .where(eq(appCheckpoints.id, Number(id)))
+      .limit(1);
+
+    if (result.length === 0) return null;
+
+    const row = result[0];
+    return {
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      hostname: row.hostname,
+      workingDirectory: row.workingDirectory,
+      state: JSON.parse(row.state),
+      createdAt: Number(row.createdAt),
+    };
+  }
+
+  async listAppCheckpoints(): Promise<AppSessionListItem[]> {
+    let result = await this.db.select({
+      id: appCheckpoints.id,
+      sessionId: appCheckpoints.sessionId,
+      hostname: appCheckpoints.hostname,
+      workingDirectory: appCheckpoints.workingDirectory,
+      createdAt: appCheckpoints.createdAt,
+    })
+      .from(appCheckpoints)
+      .orderBy(desc(appCheckpoints.createdAt));
+
+    return result.map(row => ({
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      hostname: row.hostname,
+      workingDirectory: row.workingDirectory,
+      createdAt: Number(row.createdAt),
+    }));
+  }
+
+
+
+  async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
+    const rows = await this.db.select()
+      .from(appCheckpoints)
+      .orderBy(desc(appCheckpoints.createdAt))
+      .limit(1);
+    if (rows.length === 0) return null;
+    return {
+      id: rows[0].id.toString(),
+      sessionId: rows[0].sessionId,
+      hostname: rows[0].hostname,
+      workingDirectory: rows[0].workingDirectory,
+      state: JSON.parse(rows[0].state),
+      createdAt: Number(rows[0].createdAt),
+    };
   }
 }

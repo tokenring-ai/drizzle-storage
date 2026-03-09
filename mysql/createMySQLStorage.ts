@@ -1,84 +1,173 @@
-import {AgentCheckpointListItem, AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointProvider";
+import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
+import {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import {desc, eq} from "drizzle-orm";
-import {drizzle as drizzleMysql} from "drizzle-orm/mysql2";
+import {drizzle as drizzleMysql, MySql2Database} from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {z} from "zod";
-import {agentState} from "./schema.js";
+import {agentCheckpoints, appCheckpoints} from "./schema.js";
 
 export const mysqlStorageConfigSchema = z.object({
   type: z.literal("mysql"),
   connectionString: z.string(),
 });
 
-export function createMySQLStorage(config: z.infer<typeof mysqlStorageConfigSchema>): AgentCheckpointProvider {
-  const connection = mysql.createPool(config.connectionString);
-  const db = drizzleMysql(connection);
+export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+  name = "MySQLStorage";
+  description = "MySQL storage provider";
 
-  return {
-    async start() {
-      await db.execute(`
-          CREATE TABLE \`AgentState\`
-          (
-              \`id\`        bigint AUTO_INCREMENT NOT NULL,
-              \`agentId\`   text                  NOT NULL,
-              \`name\`      text                  NOT NULL,
-              \`config\`    text                  NOT NULL,
-              \`state\`     text                  NOT NULL,
-              \`createdAt\` bigint                NOT NULL,
-              CONSTRAINT \`AgentState_id\` PRIMARY KEY (\`id\`)
-          );
-      `);
-      //TODO: Migrations do not work well due to bun packaging. We should fix this.
-      //migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
-    },
-    async storeCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
-      const result = await db
-        .insert(agentState)
-        .values({
-          agentId: checkpoint.agentId,
-          name: checkpoint.name,
-          config: JSON.stringify(checkpoint.config),
-          state: JSON.stringify(checkpoint.state),
-          createdAt: checkpoint.createdAt,
-        });
-      return result[0].insertId.toString();
-    },
+  connection: mysql.Pool;
+  db: MySql2Database<Record<string, unknown>>;
+  displayName: string;
 
-    async retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
-      let result = await db.select()
-        .from(agentState)
-        .where(eq(agentState.id, Number(id)))
-        .limit(1);
+  constructor(private readonly config: z.infer<typeof mysqlStorageConfigSchema>) {
+    const url = new URL(config.connectionString);
+    url.password = '***';
 
-      if (result.length === 0) return null;
+    this.connection = mysql.createPool(config.connectionString);
+    this.db = drizzleMysql(this.connection);
 
-      const row = result[0];
-      return {
-        id: row.id.toString(),
-        name: row.name,
-        agentId: row.agentId,
-        config: JSON.parse(row.config),
-        state: JSON.parse(row.state),
-        createdAt: Number(row.createdAt),
-      };
-    },
+    this.displayName = `MySQL (${url.toString()}`;
+  }
 
-    async listCheckpoints(): Promise<AgentCheckpointListItem[]> {
-      let result = await db.select({
-        id: agentState.id,
-        name: agentState.name,
-        agentId: agentState.agentId,
-        createdAt: agentState.createdAt,
-      })
-        .from(agentState)
-        .orderBy(desc(agentState.createdAt));
+  async start() {
+    await this.db.execute(`
+        CREATE TABLE IF NOT EXISTS \`AgentState\`
+        (
+            \`id\`        bigint AUTO_INCREMENT NOT NULL,
+            \`agentId\`   text                  NOT NULL,
+            \`name\`      text                  NOT NULL,
+            \`config\`    text                  NOT NULL,
+            \`state\`     text                  NOT NULL,
+            \`createdAt\` bigint                NOT NULL,
+            CONSTRAINT \`AgentState_id\` PRIMARY KEY (\`id\`)
+        );
+    `);
+    //TODO: Migrations do not work well due to bun packaging. We should fix this.
+    //migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
+  }
 
-      return result.map(row => ({
-        id: row.id.toString(),
-        name: row.name,
-        agentId: row.agentId,
-        createdAt: Number(row.createdAt),
-      }));
-    }
+  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
+    const result = await this.db
+      .insert(agentCheckpoints)
+      .values({
+        agentId: checkpoint.agentId,
+        name: checkpoint.name,
+        sessionId: checkpoint.sessionId,
+        agentType: checkpoint.agentType,
+        state: JSON.stringify(checkpoint.state),
+        createdAt: checkpoint.createdAt,
+      });
+    return result[0].insertId.toString();
+  }
+
+  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
+    let result = await this.db.select()
+      .from(agentCheckpoints)
+      .where(eq(agentCheckpoints.id, Number(id)))
+      .limit(1);
+
+    if (result.length === 0) return null;
+
+    const row = result[0];
+    return {
+      id: row.id.toString(),
+      name: row.name,
+      agentId: row.agentId,
+      sessionId: row.sessionId,
+      agentType: row.agentType,
+      state: JSON.parse(row.state),
+      createdAt: Number(row.createdAt),
+    };
+  }
+
+  async listAgentCheckpoints(): Promise<AgentCheckpointListItem[]> {
+    let result = await this.db.select({
+      id: agentCheckpoints.id,
+      sessionId: agentCheckpoints.sessionId,
+      name: agentCheckpoints.name,
+      agentId: agentCheckpoints.agentId,
+      agentType: agentCheckpoints.agentType,
+      createdAt: agentCheckpoints.createdAt,
+    })
+      .from(agentCheckpoints)
+      .orderBy(desc(agentCheckpoints.createdAt));
+
+    return result.map(row => ({
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      name: row.name,
+      agentId: row.agentId,
+      agentType: row.agentType,
+      createdAt: Number(row.createdAt),
+    }));
+  }
+
+  async storeAppCheckpoint(checkpoint: AppSessionCheckpoint): Promise<string> {
+    const result = await this.db
+      .insert(appCheckpoints)
+      .values({
+        sessionId: checkpoint.sessionId,
+        hostname: checkpoint.hostname,
+        workingDirectory: checkpoint.workingDirectory,
+        state: JSON.stringify(checkpoint.state),
+        createdAt: checkpoint.createdAt,
+      });
+    return result[0].insertId.toString();
+  }
+
+  async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
+    let result = await this.db.select()
+      .from(appCheckpoints)
+      .where(eq(appCheckpoints.id, Number(id)))
+      .limit(1);
+
+    if (result.length === 0) return null;
+
+    const row = result[0];
+    return {
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      hostname: row.hostname,
+      workingDirectory: row.workingDirectory,
+      state: JSON.parse(row.state),
+      createdAt: Number(row.createdAt),
+    };
+  }
+
+  async listAppCheckpoints(): Promise<AppSessionListItem[]> {
+    let result = await this.db.select({
+      id: appCheckpoints.id,
+      sessionId: appCheckpoints.sessionId,
+      hostname: appCheckpoints.hostname,
+      workingDirectory: appCheckpoints.workingDirectory,
+      createdAt: appCheckpoints.createdAt,
+    })
+      .from(appCheckpoints)
+      .orderBy(desc(appCheckpoints.createdAt));
+
+    return result.map(row => ({
+      id: row.id.toString(),
+      sessionId: row.sessionId,
+      hostname: row.hostname,
+      workingDirectory: row.workingDirectory,
+      createdAt: Number(row.createdAt),
+    }));
+  }
+
+  async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
+    const rows = await this.db.select()
+      .from(appCheckpoints)
+      .orderBy(desc(appCheckpoints.createdAt))
+      .limit(1);
+    if (rows.length === 0) return null;
+    return {
+      id: rows[0].id.toString(),
+      sessionId: rows[0].sessionId,
+      hostname: rows[0].hostname,
+      workingDirectory: rows[0].workingDirectory,
+      state: JSON.parse(rows[0].state),
+      createdAt: Number(rows[0].createdAt),
+    };
   }
 }

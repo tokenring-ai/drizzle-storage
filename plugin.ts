@@ -1,14 +1,15 @@
 import {TokenRingPlugin} from "@tokenring-ai/app";
 import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
-import {CheckpointConfigSchema} from "@tokenring-ai/checkpoint/schema";
+import AppCheckpointService from "@tokenring-ai/checkpoint/AppCheckpointService";
 import {z} from "zod";
-import {createMySQLStorage, mysqlStorageConfigSchema} from "./mysql/createMySQLStorage.js";
+import {MySQLStorage} from "./mysql/createMySQLStorage.js";
 import packageJSON from "./package.json" with {type: "json"};
-import {createPostgresStorage, postgresStorageConfigSchema} from "./postgres/createPostgresStorage.js";
-import {createSQLiteStorage, sqliteStorageConfigSchema} from "./sqlite/createSQLiteStorage.js";
+import {PostgresStorage} from "./postgres/createPostgresStorage.js";
+import {DrizzleStorageConfigSchema} from "./schema.ts";
+import {SQLiteStorage} from "./sqlite/createSQLiteStorage.js";
 
 const packageConfigSchema = z.object({
-  checkpoint: CheckpointConfigSchema.optional(),
+  drizzleStorage: DrizzleStorageConfigSchema,
 })
 
 export default {
@@ -16,25 +17,26 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    if (config.checkpoint) {
-      app.services
-        .waitForItemByType(AgentCheckpointService, (checkpointService) => {
-          const provider = config.checkpoint!.provider;
+    const storage = config.drizzleStorage;
 
-          if (provider.type === "sqlite") {
-            checkpointService.setCheckpointProvider(
-              createSQLiteStorage(sqliteStorageConfigSchema.parse(provider))
-            );
-          } else if (provider.type === "mysql") {
-            checkpointService.setCheckpointProvider(
-              createMySQLStorage(mysqlStorageConfigSchema.parse(provider))
-            );
-          } else if (provider.type === "postgres") {
-            checkpointService.setCheckpointProvider(
-              createPostgresStorage(postgresStorageConfigSchema.parse(provider))
-            )
-          }
+    if (storage) {
+      let storageService: SQLiteStorage | MySQLStorage | PostgresStorage | null = null;
+      if (storage.type === "sqlite") {
+        storageService = new SQLiteStorage(storage);
+      } else if (storage.type === "mysql") {
+        storageService = new MySQLStorage(storage);
+      } else if (storage.type === "postgres") {
+        storageService = new PostgresStorage(storage);
+      }
+      if (storageService) {
+        app.services.register(storageService);
+        app.services.waitForItemByType(AgentCheckpointService, (checkpointService) => {
+          checkpointService.setCheckpointProvider(storageService);
         });
+        app.services.waitForItemByType(AppCheckpointService, (checkpointService) => {
+          checkpointService.setCheckpointProvider(storageService);
+        });
+      }
     }
   },
   config: packageConfigSchema

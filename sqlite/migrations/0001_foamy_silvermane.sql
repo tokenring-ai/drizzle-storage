@@ -1,1 +1,0 @@
-ALTER TABLE `AgentState` ADD `config` text NOT NULL;
