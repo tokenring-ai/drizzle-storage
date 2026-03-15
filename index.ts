@@ -3,16 +3,16 @@
  *
  * A multi-database storage solution for Token Ring AI agent state checkpoints using Drizzle ORM.
  *
- * This package provides factory functions for creating storage providers that implement the
- * AgentCheckpointProvider interface. It supports SQLite (Bun), MySQL, and PostgreSQL databases.
+ * This package provides storage classes that implement both the AgentCheckpointStorage
+ * and AppCheckpointStorage interfaces. It supports SQLite (Bun), MySQL, and PostgreSQL databases.
  *
  * @example
  * ```typescript
- * import { createPostgresStorage } from '@tokenring-ai/drizzle-storage';
+ * import { SQLiteStorage } from '@tokenring-ai/drizzle-storage';
  *
- * const storage = createPostgresStorage({
- *   type: "postgres",
- *   connectionString: process.env.DATABASE_URL
+ * const storage = new SQLiteStorage({
+ *   type: "sqlite",
+ *   databasePath: "./agent_state.db"
  * });
  *
  * await storage.start();
