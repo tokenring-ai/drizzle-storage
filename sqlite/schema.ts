@@ -14,7 +14,7 @@ export const appCheckpoints = sqliteTable("AppCheckpoints", {
   id: integer("id").primaryKey({autoIncrement: true}),
   sessionId: text("sessionId").notNull(),
   hostname: text("hostname").notNull(),
-  workingDirectory: text("workingDirectory").notNull(),
+  projectDirectory: text("projectDirectory").notNull(),
   state: text("state").notNull(),
   createdAt: integer("createdAt").notNull(),
 });

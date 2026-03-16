@@ -14,7 +14,7 @@ export const appCheckpoints = pgTable("AppCheckpoints", {
   id: bigserial("id", {mode: "number"}).primaryKey(),
   sessionId: pgText("sessionId").notNull(),
   hostname: pgText("hostname").notNull(),
-  workingDirectory: pgText("workingDirectory").notNull(),
+  projectDirectory: pgText("projectDirectory").notNull(),
   state: pgText("state").notNull(),
   createdAt: pgBigint("createdAt", {mode: "number"}).notNull(),
 });

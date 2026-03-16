@@ -47,7 +47,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
             \`id\`            integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             \`sessionId\`     text                              NOT NULL,
             \`hostname\`      text                              NOT NULL,
-            \`workingDirectory\` text                            NOT NULL,
+            \`projectDirectory\` text NOT NULL,
             \`state\`         text                              NOT NULL,
             \`createdAt\`     integer                           NOT NULL
         );
@@ -120,7 +120,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
       .values({
         sessionId: checkpoint.sessionId,
         hostname: checkpoint.hostname,
-        workingDirectory: checkpoint.workingDirectory,
+        projectDirectory: checkpoint.projectDirectory,
         state: JSON.stringify(checkpoint.state),
         createdAt: checkpoint.createdAt,
       })
@@ -141,7 +141,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
-      workingDirectory: row.workingDirectory,
+      projectDirectory: row.projectDirectory,
       state: JSON.parse(row.state),
       createdAt: Number(row.createdAt),
     };
@@ -152,7 +152,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
       id: appCheckpoints.id,
       sessionId: appCheckpoints.sessionId,
       hostname: appCheckpoints.hostname,
-      workingDirectory: appCheckpoints.workingDirectory,
+      projectDirectory: appCheckpoints.projectDirectory,
       createdAt: appCheckpoints.createdAt,
     })
       .from(appCheckpoints)
@@ -162,7 +162,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
-      workingDirectory: row.workingDirectory,
+      projectDirectory: row.projectDirectory,
       createdAt: Number(row.createdAt),
     }));
   }
@@ -178,7 +178,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
       id: rows[0].id.toString(),
       sessionId: rows[0].sessionId,
       hostname: rows[0].hostname,
-      workingDirectory: rows[0].workingDirectory,
+      projectDirectory: rows[0].projectDirectory,
       state: JSON.parse(rows[0].state),
       createdAt: Number(rows[0].createdAt),
     };

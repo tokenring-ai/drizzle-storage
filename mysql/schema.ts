@@ -14,7 +14,7 @@ export const appCheckpoints = mysqlTable("AppCheckpoints", {
   id: bigint("id", {mode: "number"}).primaryKey().autoincrement(),
   sessionId: mysqlText("sessionId").notNull(),
   hostname: mysqlText("hostname").notNull(),
-  workingDirectory: mysqlText("workingDirectory").notNull(),
+  projectDirectory: mysqlText("projectDirectory").notNull(),
   state: mysqlText("state").notNull(),
   createdAt: bigint("createdAt", {mode: "number"}).notNull(),
 });

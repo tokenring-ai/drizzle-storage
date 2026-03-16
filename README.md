@@ -111,8 +111,8 @@ import { AppSessionCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStor
 const appCheckpoint: AppSessionCheckpoint = {
   sessionId: "session-789",
   hostname: "localhost",
-  workingDirectory: "/path/to/project",
-  state: { workingDirectory: "/path/to/project", files: [] },
+  projectDirectory: "/path/to/project",
+  state: { projectDirectory: "/path/to/project", files: [] },
   createdAt: Date.now()
 };
 
@@ -408,7 +408,7 @@ interface AgentCheckpointListItem {
 interface AppSessionCheckpoint {
   sessionId: string;
   hostname: string;
-  workingDirectory: string;
+  projectDirectory: string;
   state: any;
   createdAt: number;
 }
@@ -421,7 +421,7 @@ interface AppSessionListItem {
   id: string;
   sessionId: string;
   hostname: string;
-  workingDirectory: string;
+  projectDirectory: string;
   createdAt: number;
 }
 ```
@@ -444,14 +444,14 @@ All database types use the same logical schema with two tables: `AgentCheckpoint
 
 ### AppCheckpoints Table
 
-| Column           | Type           | Description                              |
-|------------------|----------------|------------------------------------------|
-| `id`             | Integer/BigInt | Auto-incrementing primary key            |
-| `sessionId`      | Text           | Session identifier                       |
-| `hostname`       | Text           | Hostname of the application              |
-| `workingDirectory` | Text         | Current working directory                |
-| `state`          | Text           | JSON-serialized state data               |
-| `createdAt`      | Integer/BigInt | Unix timestamp                           |
+| Column             | Type           | Description                   |
+|--------------------|----------------|-------------------------------|
+| `id`               | Integer/BigInt | Auto-incrementing primary key |
+| `sessionId`        | Text           | Session identifier            |
+| `hostname`         | Text           | Hostname of the application   |
+| `projectDirectory` | Text           | Current working directory     |
+| `state`            | Text           | JSON-serialized state data    |
+| `createdAt`        | Integer/BigInt | Unix timestamp                |
 
 ### Schema Implementation
 
@@ -480,7 +480,7 @@ export const appCheckpoints = sqliteTable("AppCheckpoints", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   sessionId: text("sessionId").notNull(),
   hostname: text("hostname").notNull(),
-  workingDirectory: text("workingDirectory").notNull(),
+  projectDirectory: text("projectDirectory").notNull(),
   state: text("state").notNull(),
   createdAt: integer("createdAt").notNull(),
 });
@@ -555,8 +555,8 @@ describe("DrizzleStorage", () => {
       const checkpoint: AppSessionCheckpoint = {
         sessionId: "app-session-1",
         hostname: "localhost",
-        workingDirectory: "/path/to/project",
-        state: { workingDirectory: "/path/to/project", files: [] },
+        projectDirectory: "/path/to/project",
+        state: {projectDirectory: "/path/to/project", files: []},
         createdAt: Date.now(),
       };
 
@@ -585,7 +585,7 @@ describe("DrizzleStorage", () => {
       expect(list[0]).toHaveProperty("id");
       expect(list[0]).toHaveProperty("sessionId");
       expect(list[0]).toHaveProperty("hostname");
-      expect(list[0]).toHaveProperty("workingDirectory");
+      expect(list[0]).toHaveProperty("projectDirectory");
     });
 
     it("should retrieve latest app checkpoint", async () => {
@@ -717,8 +717,8 @@ await storage.start();
 const appCheckpoint = {
   sessionId: "app-session-1",
   hostname: "localhost",
-  workingDirectory: "/path/to/project",
-  state: { workingDirectory: "/path/to/project", files: [] },
+  projectDirectory: "/path/to/project",
+  state: {projectDirectory: "/path/to/project", files: []},
   createdAt: Date.now()
 };
 
