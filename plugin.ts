@@ -2,11 +2,11 @@ import {TokenRingPlugin} from "@tokenring-ai/app";
 import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
 import AppCheckpointService from "@tokenring-ai/checkpoint/AppCheckpointService";
 import {z} from "zod";
-import {MySQLStorage} from "./mysql/createMySQLStorage.js";
+import {MySQLStorage} from "./mysql/createMySQLStorage.ts";
 import packageJSON from "./package.json" with {type: "json"};
-import {PostgresStorage} from "./postgres/createPostgresStorage.js";
+import {PostgresStorage} from "./postgres/createPostgresStorage.ts";
 import {DrizzleStorageConfigSchema} from "./schema.ts";
-import {SQLiteStorage} from "./sqlite/createSQLiteStorage.js";
+import {SQLiteStorage} from "./sqlite/createSQLiteStorage.ts";
 
 const packageConfigSchema = z.object({
   drizzleStorage: DrizzleStorageConfigSchema,

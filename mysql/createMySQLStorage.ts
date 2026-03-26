@@ -5,7 +5,7 @@ import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleMysql, MySql2Database} from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {z} from "zod";
-import {agentCheckpoints, appCheckpoints} from "./schema.js";
+import {agentCheckpoints, appCheckpoints} from "./schema.ts";
 
 export const mysqlStorageConfigSchema = z.object({
   type: z.literal("mysql"),
@@ -27,7 +27,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
     this.connection = mysql.createPool(config.connectionString);
     this.db = drizzleMysql(this.connection);
 
-    this.displayName = `MySQL (${url.toString()}`;
+    this.displayName = `MySQL (${url.toString()})`;
   }
 
   async start() {

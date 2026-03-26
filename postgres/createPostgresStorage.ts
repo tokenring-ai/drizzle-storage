@@ -5,7 +5,7 @@ import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzlePostgres} from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import {z} from "zod";
-import {agentCheckpoints, appCheckpoints} from "./schema.js";
+import {agentCheckpoints, appCheckpoints} from "./schema.ts";
 
 export const postgresStorageConfigSchema = z.object({
   type: z.literal("postgres"),
@@ -27,7 +27,7 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
     this.connection = postgres(config.connectionString);
     this.db = drizzlePostgres(this.connection);
 
-    this.displayName = `Postgres (${url.toString()}`;
+    this.displayName = `Postgres (${url.toString()})`;
   }
 
   async start() {

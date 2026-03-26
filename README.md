@@ -15,7 +15,7 @@ The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage
 - **Connection Pooling**: Built-in pooling for MySQL and PostgreSQL
 - **Token Ring Service**: Seamless integration via Token Ring's service system
 - **JSON State Management**: Automatic JSON serialization/deserialization
-- **Comprehensive Testing**: Vitest with Docker containers for MySQL and PostgreSQL
+- **Comprehensive Testing**: Vitest with Bun runtime for SQLite
 - **Plugin Support**: TokenRingPlugin for automatic configuration
 
 ## Installation
@@ -488,7 +488,7 @@ export const appCheckpoints = sqliteTable("AppCheckpoints", {
 
 ## Testing
 
-Run the comprehensive test suite with Docker containers:
+Run the comprehensive test suite with Bun runtime:
 
 ```bash
 # Run all tests
@@ -503,105 +503,70 @@ bun test --coverage
 
 ### Test Coverage
 
-- **SQLite**: Local file database (skipped in non-Bun environments)
-- **MySQL**: Docker container (mysql:8.0)
-- **PostgreSQL**: Docker container (postgres:16)
+- **SQLite**: Local file database (requires Bun runtime)
+- **MySQL/PostgreSQL**: Tests are currently skipped (require Docker/testcontainers)
 - CRUD operations for both agent and app checkpoints
 - Error handling and edge cases
 - Non-existent checkpoint retrieval (returns `null`)
-- Connection management
+- Complex state structure preservation
 
 ### Example Test
 
 ```typescript
 import { AgentCheckpointStorage, NamedAgentCheckpoint } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 import { AppCheckpointStorage, AppSessionCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
-import { describe, expect, it, beforeAll } from "vitest";
-import { MySQLStorage } from "./mysql/createMySQLStorage.js";
+import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { SQLiteStorage } from "./sqlite/createSQLiteStorage.js";
 
-describe("DrizzleStorage", () => {
-  describe("MySQL", () => {
-    let storage: MySQLStorage;
+describe("DrizzleStorage - SQLite", () => {
+  let storage: AgentCheckpointStorage;
+  const dbPath = "./test-agent-state.db";
 
-    beforeAll(async () => {
-      storage = new MySQLStorage({
-        type: "mysql",
-        connectionString: "mysql://root:test@localhost:3306/testdb",
-      });
-      await storage.start();
+  beforeAll(async () => {
+    storage = new SQLiteStorage({
+      type: "sqlite",
+      databasePath: dbPath,
     });
+    await storage.start();
+  });
 
-    it("should store and retrieve agent checkpoint", async () => {
-      const checkpoint: NamedAgentCheckpoint = {
-        agentId: "test-agent-1",
-        sessionId: "session-1",
-        agentType: "coder",
-        name: "session-1",
-        state: { agentState: { messages: { hello: "world" } }, toolsEnabled: ["foo"], hooksEnabled: ["bar"] },
-        createdAt: Date.now(),
-      };
+  afterAll(async () => {
+    // Cleanup: remove test database file
+    const { unlinkSync, existsSync } = await import("node:fs");
+    if (existsSync(dbPath)) {
+      unlinkSync(dbPath);
+    }
+  });
 
-      const id = await storage.storeAgentCheckpoint(checkpoint);
-      expect(id).toBeDefined();
+  it("should store and retrieve checkpoint", async () => {
+    const checkpoint: NamedAgentCheckpoint = {
+      agentId: "test-agent-1",
+      sessionId: "session-1",
+      agentType: "general",
+      name: "session-1",
+      state: { agentState: { messages: { hello: "world" } }, toolsEnabled: ["foo"], hooksEnabled: ["bar"] },
+      createdAt: Date.now(),
+    };
 
-      const retrieved = await storage.retrieveAgentCheckpoint(id);
-      expect(retrieved).toBeDefined();
-      expect(retrieved?.agentId).toBe(checkpoint.agentId);
-      expect(retrieved?.sessionId).toBe(checkpoint.sessionId);
-      expect(retrieved?.state).toEqual(checkpoint.state);
-    });
+    const id = await storage.storeAgentCheckpoint(checkpoint);
+    expect(id).toBeDefined();
+    expect(typeof id).toBe("string");
 
-    it("should store and retrieve app checkpoint", async () => {
-      const checkpoint: AppSessionCheckpoint = {
-        sessionId: "app-session-1",
-        hostname: "localhost",
-        projectDirectory: "/path/to/project",
-        state: {projectDirectory: "/path/to/project", files: []},
-        createdAt: Date.now(),
-      };
+    const retrieved = await storage.retrieveAgentCheckpoint(id);
+    expect(retrieved).toBeDefined();
+    expect(retrieved?.agentId).toBe(checkpoint.agentId);
+    expect(retrieved?.name).toBe(checkpoint.name);
+    expect(retrieved?.state).toEqual(checkpoint.state);
+  });
 
-      const id = await storage.storeAppCheckpoint(checkpoint);
-      expect(id).toBeDefined();
-
-      const retrieved = await storage.retrieveAppCheckpoint(id);
-      expect(retrieved).toBeDefined();
-      expect(retrieved?.sessionId).toBe(checkpoint.sessionId);
-      expect(retrieved?.hostname).toBe(checkpoint.hostname);
-      expect(retrieved?.state).toEqual(checkpoint.state);
-    });
-
-    it("should list agent checkpoints", async () => {
-      const list = await storage.listAgentCheckpoints();
-      expect(list.length).toBeGreaterThan(0);
-      expect(list[0]).toHaveProperty("id");
-      expect(list[0]).toHaveProperty("name");
-      expect(list[0]).toHaveProperty("agentId");
-      expect(list[0]).toHaveProperty("createdAt");
-    });
-
-    it("should list app checkpoints", async () => {
-      const list = await storage.listAppCheckpoints();
-      expect(list.length).toBeGreaterThan(0);
-      expect(list[0]).toHaveProperty("id");
-      expect(list[0]).toHaveProperty("sessionId");
-      expect(list[0]).toHaveProperty("hostname");
-      expect(list[0]).toHaveProperty("projectDirectory");
-    });
-
-    it("should retrieve latest app checkpoint", async () => {
-      const latest = await storage.retrieveLatestAppCheckpoint();
-      expect(latest).toBeDefined();
-      expect(latest).toHaveProperty("id");
-      expect(latest).toHaveProperty("sessionId");
-    });
-
-    it("should return null for non-existent checkpoint", async () => {
-      const retrieved = await storage.retrieveAgentCheckpoint("999999");
-      expect(retrieved).toBeNull();
-    });
+  it("should return null for non-existent checkpoint", async () => {
+    const retrieved = await storage.retrieveAgentCheckpoint("999999");
+    expect(retrieved).toBeNull();
   });
 });
 ```
+
+**Note**: MySQL and PostgreSQL tests are currently skipped as they require Docker/testcontainers. To enable these tests, you'll need to set up Docker containers using testcontainers.
 
 ## Project Structure
 

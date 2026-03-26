@@ -5,7 +5,7 @@ import Database from "bun:sqlite";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleSqlite} from "drizzle-orm/bun-sqlite";
 import {z} from "zod";
-import {agentCheckpoints, appCheckpoints} from "./schema.js";
+import {agentCheckpoints, appCheckpoints} from "./schema.ts";
 
 export const sqliteStorageConfigSchema = z.object({
   type: z.literal("sqlite"),
