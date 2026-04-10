@@ -1,4 +1,4 @@
-import {bigint as pgBigint, bigserial, pgTable, text as pgText} from "drizzle-orm/pg-core";
+import {bigint as pgBigint, bigserial, pgTable, text as pgText,} from "drizzle-orm/pg-core";
 
 export const agentCheckpoints = pgTable("AgentCheckpoints", {
   id: bigserial("id", {mode: "number"}).primaryKey(),

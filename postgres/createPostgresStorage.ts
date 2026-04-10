@@ -1,6 +1,11 @@
-import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
-import {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import type {AppSessionCheckpoint, TokenRingService,} from "@tokenring-ai/app/types";
+import type {
+  AgentCheckpointListItem,
+  AgentCheckpointStorage,
+  NamedAgentCheckpoint,
+  StoredAgentCheckpoint,
+} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint,} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzlePostgres} from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -12,7 +17,8 @@ export const postgresStorageConfigSchema = z.object({
   connectionString: z.string(),
 });
 
-export class PostgresStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+export class PostgresStorage
+  implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
   name = "PostgresStorage";
   description = "PostgreSQL storage provider";
 
@@ -20,9 +26,11 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
   db: ReturnType<typeof drizzlePostgres>;
   displayName: string;
 
-  constructor(private readonly config: z.infer<typeof postgresStorageConfigSchema>) {
+  constructor(
+    readonly config: z.infer<typeof postgresStorageConfigSchema>,
+  ) {
     const url = new URL(config.connectionString);
-    url.password = '***';
+    url.password = "***";
 
     this.connection = postgres(config.connectionString);
     this.db = drizzlePostgres(this.connection);
@@ -48,7 +56,9 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
     //migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
   }
 
-  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
+  async storeAgentCheckpoint(
+    checkpoint: NamedAgentCheckpoint,
+  ): Promise<string> {
     const result = await this.db
       .insert(agentCheckpoints)
       .values({
@@ -63,8 +73,11 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
     return result[0].id.toString();
   }
 
-  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
-    let result = await this.db.select()
+  async retrieveAgentCheckpoint(
+    id: string,
+  ): Promise<StoredAgentCheckpoint | null> {
+    const result = await this.db
+      .select()
       .from(agentCheckpoints)
       .where(eq(agentCheckpoints.id, Number(id)))
       .limit(1);
@@ -84,18 +97,19 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
   }
 
   async listAgentCheckpoints(): Promise<AgentCheckpointListItem[]> {
-    let result = await this.db.select({
-      id: agentCheckpoints.id,
-      sessionId: agentCheckpoints.sessionId,
-      name: agentCheckpoints.name,
-      agentId: agentCheckpoints.agentId,
-      agentType: agentCheckpoints.agentType,
-      createdAt: agentCheckpoints.createdAt,
-    })
+    const result = await this.db
+      .select({
+        id: agentCheckpoints.id,
+        sessionId: agentCheckpoints.sessionId,
+        name: agentCheckpoints.name,
+        agentId: agentCheckpoints.agentId,
+        agentType: agentCheckpoints.agentType,
+        createdAt: agentCheckpoints.createdAt,
+      })
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map(row => ({
+    return result.map((row) => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       name: row.name,
@@ -120,7 +134,8 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
   }
 
   async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
-    let result = await this.db.select()
+    const result = await this.db
+      .select()
       .from(appCheckpoints)
       .where(eq(appCheckpoints.id, Number(id)))
       .limit(1);
@@ -139,17 +154,18 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
   }
 
   async listAppCheckpoints(): Promise<AppSessionListItem[]> {
-    let result = await this.db.select({
-      id: appCheckpoints.id,
-      sessionId: appCheckpoints.sessionId,
-      hostname: appCheckpoints.hostname,
-      projectDirectory: appCheckpoints.projectDirectory,
-      createdAt: appCheckpoints.createdAt,
-    })
+    const result = await this.db
+      .select({
+        id: appCheckpoints.id,
+        sessionId: appCheckpoints.sessionId,
+        hostname: appCheckpoints.hostname,
+        projectDirectory: appCheckpoints.projectDirectory,
+        createdAt: appCheckpoints.createdAt,
+      })
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map(row => ({
+    return result.map((row) => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
@@ -158,10 +174,9 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
     }));
   }
 
-
-
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
-    const rows = await this.db.select()
+    const rows = await this.db
+      .select()
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt))
       .limit(1);

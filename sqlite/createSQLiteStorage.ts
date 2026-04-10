@@ -1,6 +1,11 @@
-import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
-import {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import type {AppSessionCheckpoint, TokenRingService,} from "@tokenring-ai/app/types";
+import type {
+  AgentCheckpointListItem,
+  AgentCheckpointStorage,
+  NamedAgentCheckpoint,
+  StoredAgentCheckpoint,
+} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint,} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import Database from "bun:sqlite";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleSqlite} from "drizzle-orm/bun-sqlite";
@@ -13,7 +18,8 @@ export const sqliteStorageConfigSchema = z.object({
   migrationsFolder: z.string().optional(),
 });
 
-export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+export class SQLiteStorage
+  implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
   name = "SQLiteStorage";
   description = "SQLite storage provider";
 
@@ -21,13 +27,15 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
   db: ReturnType<typeof drizzleSqlite>;
   displayName: string;
 
-  constructor(private readonly config: z.infer<typeof sqliteStorageConfigSchema>) {
+  constructor(
+    readonly config: z.infer<typeof sqliteStorageConfigSchema>,
+  ) {
     this.sqlite = new Database(config.databasePath);
     this.db = drizzleSqlite(this.sqlite);
     this.displayName = `SQLite (${config.databasePath})`;
   }
 
-  async start() {
+  start() {
     this.db.run(`
         CREATE TABLE IF NOT EXISTS \`AgentCheckpoints\`
         (
@@ -57,7 +65,9 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     //migrateSqlite(db, {migrationsFolder: join(import.meta.dirname, "migrations"), });
   }
 
-  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
+  async storeAgentCheckpoint(
+    checkpoint: NamedAgentCheckpoint,
+  ): Promise<string> {
     const result = await this.db
       .insert(agentCheckpoints)
       .values({
@@ -72,8 +82,11 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     return result[0].id.toString();
   }
 
-  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
-    let result = await this.db.select()
+  async retrieveAgentCheckpoint(
+    id: string,
+  ): Promise<StoredAgentCheckpoint | null> {
+    const result = await this.db
+      .select()
       .from(agentCheckpoints)
       .where(eq(agentCheckpoints.id, Number(id)))
       .limit(1);
@@ -93,18 +106,19 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
   }
 
   async listAgentCheckpoints(): Promise<AgentCheckpointListItem[]> {
-    let result = await this.db.select({
-      id: agentCheckpoints.id,
-      sessionId: agentCheckpoints.sessionId,
-      name: agentCheckpoints.name,
-      agentId: agentCheckpoints.agentId,
-      agentType: agentCheckpoints.agentType,
-      createdAt: agentCheckpoints.createdAt,
-    })
+    const result = await this.db
+      .select({
+        id: agentCheckpoints.id,
+        sessionId: agentCheckpoints.sessionId,
+        name: agentCheckpoints.name,
+        agentId: agentCheckpoints.agentId,
+        agentType: agentCheckpoints.agentType,
+        createdAt: agentCheckpoints.createdAt,
+      })
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map(row => ({
+    return result.map((row) => ({
       id: row.id.toString(),
       name: row.name,
       sessionId: row.sessionId,
@@ -129,7 +143,8 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
   }
 
   async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
-    let result = await this.db.select()
+    const result = await this.db
+      .select()
       .from(appCheckpoints)
       .where(eq(appCheckpoints.id, Number(id)))
       .limit(1);
@@ -148,17 +163,18 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
   }
 
   async listAppCheckpoints(): Promise<AppSessionListItem[]> {
-    let result = await this.db.select({
-      id: appCheckpoints.id,
-      sessionId: appCheckpoints.sessionId,
-      hostname: appCheckpoints.hostname,
-      projectDirectory: appCheckpoints.projectDirectory,
-      createdAt: appCheckpoints.createdAt,
-    })
+    const result = await this.db
+      .select({
+        id: appCheckpoints.id,
+        sessionId: appCheckpoints.sessionId,
+        hostname: appCheckpoints.hostname,
+        projectDirectory: appCheckpoints.projectDirectory,
+        createdAt: appCheckpoints.createdAt,
+      })
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map(row => ({
+    return result.map((row) => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
@@ -167,9 +183,9 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     }));
   }
 
-
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
-    const rows = await this.db.select()
+    const rows = await this.db
+      .select()
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt))
       .limit(1);

@@ -1,4 +1,4 @@
-import {TokenRingPlugin} from "@tokenring-ai/app";
+import type {TokenRingPlugin} from "@tokenring-ai/app";
 import AgentCheckpointService from "@tokenring-ai/checkpoint/AgentCheckpointService";
 import AppCheckpointService from "@tokenring-ai/checkpoint/AppCheckpointService";
 import {z} from "zod";
@@ -10,7 +10,7 @@ import {SQLiteStorage} from "./sqlite/createSQLiteStorage.ts";
 
 const packageConfigSchema = z.object({
   drizzleStorage: DrizzleStorageConfigSchema,
-})
+});
 
 export default {
   name: packageJSON.name,
@@ -21,7 +21,11 @@ export default {
     const storage = config.drizzleStorage;
 
     if (storage) {
-      let storageService: SQLiteStorage | MySQLStorage | PostgresStorage | null = null;
+      let storageService:
+        | SQLiteStorage
+        | MySQLStorage
+        | PostgresStorage
+        | null = null;
       if (storage.type === "sqlite") {
         storageService = new SQLiteStorage(storage);
       } else if (storage.type === "mysql") {
@@ -31,14 +35,20 @@ export default {
       }
       if (storageService) {
         app.services.register(storageService);
-        app.services.waitForItemByType(AgentCheckpointService, (checkpointService) => {
-          checkpointService.setCheckpointProvider(storageService);
-        });
-        app.services.waitForItemByType(AppCheckpointService, (checkpointService) => {
-          checkpointService.setCheckpointProvider(storageService);
-        });
+        app.services.waitForItemByType(
+          AgentCheckpointService,
+          (checkpointService) => {
+            checkpointService.setCheckpointProvider(storageService);
+          },
+        );
+        app.services.waitForItemByType(
+          AppCheckpointService,
+          (checkpointService) => {
+            checkpointService.setCheckpointProvider(storageService);
+          },
+        );
       }
     }
   },
-  config: packageConfigSchema
+  config: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
