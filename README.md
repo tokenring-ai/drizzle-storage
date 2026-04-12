@@ -259,6 +259,7 @@ import {
 ### Storage Classes
 
 All three storage classes (`SQLiteStorage`, `MySQLStorage`, `PostgresStorage`) implement the following interfaces:
+
 - `TokenRingService`
 - `AgentCheckpointStorage`
 - `AppCheckpointStorage`

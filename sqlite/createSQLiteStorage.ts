@@ -1,11 +1,11 @@
-import type {AppSessionCheckpoint, TokenRingService,} from "@tokenring-ai/app/types";
+import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
 import type {
   AgentCheckpointListItem,
   AgentCheckpointStorage,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint,} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import Database from "bun:sqlite";
 import {desc, eq} from "drizzle-orm";
 import {drizzle as drizzleSqlite} from "drizzle-orm/bun-sqlite";
