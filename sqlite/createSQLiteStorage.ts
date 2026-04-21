@@ -1,25 +1,24 @@
-import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
+import Database from "bun:sqlite";
+import type { AppSessionCheckpoint, TokenRingService } from "@tokenring-ai/app/types";
 import type {
   AgentCheckpointListItem,
   AgentCheckpointStorage,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
-import Database from "bun:sqlite";
-import {desc, eq} from "drizzle-orm";
-import {drizzle as drizzleSqlite} from "drizzle-orm/bun-sqlite";
-import {z} from "zod";
-import {agentCheckpoints, appCheckpoints} from "./schema.ts";
+import type { AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import { desc, eq } from "drizzle-orm";
+import { drizzle as drizzleSqlite } from "drizzle-orm/bun-sqlite";
+import { z } from "zod";
+import { agentCheckpoints, appCheckpoints } from "./schema.ts";
 
 export const sqliteStorageConfigSchema = z.object({
   type: z.literal("sqlite"),
   databasePath: z.string(),
-  migrationsFolder: z.string().optional(),
+  migrationsFolder: z.string().exactOptional(),
 });
 
-export class SQLiteStorage
-  implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
   name = "SQLiteStorage";
   description = "SQLite storage provider";
 
@@ -27,9 +26,7 @@ export class SQLiteStorage
   db: ReturnType<typeof drizzleSqlite>;
   displayName: string;
 
-  constructor(
-    readonly config: z.infer<typeof sqliteStorageConfigSchema>,
-  ) {
+  constructor(readonly config: z.infer<typeof sqliteStorageConfigSchema>) {
     this.sqlite = new Database(config.databasePath);
     this.db = drizzleSqlite(this.sqlite);
     this.displayName = `SQLite (${config.databasePath})`;
@@ -65,9 +62,7 @@ export class SQLiteStorage
     //migrateSqlite(db, {migrationsFolder: join(import.meta.dirname, "migrations"), });
   }
 
-  async storeAgentCheckpoint(
-    checkpoint: NamedAgentCheckpoint,
-  ): Promise<string> {
+  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
     const result = await this.db
       .insert(agentCheckpoints)
       .values({
@@ -78,13 +73,11 @@ export class SQLiteStorage
         state: JSON.stringify(checkpoint.state),
         createdAt: checkpoint.createdAt,
       })
-      .returning({id: agentCheckpoints.id});
+      .returning({ id: agentCheckpoints.id });
     return result[0].id.toString();
   }
 
-  async retrieveAgentCheckpoint(
-    id: string,
-  ): Promise<StoredAgentCheckpoint | null> {
+  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
     const result = await this.db
       .select()
       .from(agentCheckpoints)
@@ -118,7 +111,7 @@ export class SQLiteStorage
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map((row) => ({
+    return result.map(row => ({
       id: row.id.toString(),
       name: row.name,
       sessionId: row.sessionId,
@@ -138,7 +131,7 @@ export class SQLiteStorage
         state: JSON.stringify(checkpoint.state),
         createdAt: checkpoint.createdAt,
       })
-      .returning({id: appCheckpoints.id});
+      .returning({ id: appCheckpoints.id });
     return result[0].id.toString();
   }
 
@@ -174,7 +167,7 @@ export class SQLiteStorage
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map((row) => ({
+    return result.map(row => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
@@ -184,11 +177,7 @@ export class SQLiteStorage
   }
 
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
-    const rows = await this.db
-      .select()
-      .from(appCheckpoints)
-      .orderBy(desc(appCheckpoints.createdAt))
-      .limit(1);
+    const rows = await this.db.select().from(appCheckpoints).orderBy(desc(appCheckpoints.createdAt)).limit(1);
     if (rows.length === 0) return null;
     return {
       id: rows[0].id.toString(),

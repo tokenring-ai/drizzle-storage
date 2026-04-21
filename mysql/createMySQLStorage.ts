@@ -1,24 +1,23 @@
-import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
+import type { AppSessionCheckpoint, TokenRingService } from "@tokenring-ai/app/types";
 import type {
   AgentCheckpointListItem,
   AgentCheckpointStorage,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
-import {desc, eq} from "drizzle-orm";
-import {drizzle as drizzleMysql, type MySql2Database} from "drizzle-orm/mysql2";
+import type { AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import { desc, eq } from "drizzle-orm";
+import { drizzle as drizzleMysql, type MySql2Database } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import {z} from "zod";
-import {agentCheckpoints, appCheckpoints} from "./schema.ts";
+import { z } from "zod";
+import { agentCheckpoints, appCheckpoints } from "./schema.ts";
 
 export const mysqlStorageConfigSchema = z.object({
   type: z.literal("mysql"),
   connectionString: z.string(),
 });
 
-export class MySQLStorage
-  implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
   name = "MySQLStorage";
   description = "MySQL storage provider";
 
@@ -26,9 +25,7 @@ export class MySQLStorage
   db: MySql2Database<Record<string, unknown>>;
   displayName: string;
 
-  constructor(
-    readonly config: z.infer<typeof mysqlStorageConfigSchema>,
-  ) {
+  constructor(readonly config: z.infer<typeof mysqlStorageConfigSchema>) {
     const url = new URL(config.connectionString);
     url.password = "***";
 
@@ -55,9 +52,7 @@ export class MySQLStorage
     //migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
   }
 
-  async storeAgentCheckpoint(
-    checkpoint: NamedAgentCheckpoint,
-  ): Promise<string> {
+  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
     const result = await this.db.insert(agentCheckpoints).values({
       agentId: checkpoint.agentId,
       name: checkpoint.name,
@@ -69,9 +64,7 @@ export class MySQLStorage
     return result[0].insertId.toString();
   }
 
-  async retrieveAgentCheckpoint(
-    id: string,
-  ): Promise<StoredAgentCheckpoint | null> {
+  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
     const result = await this.db
       .select()
       .from(agentCheckpoints)
@@ -105,7 +98,7 @@ export class MySQLStorage
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map((row) => ({
+    return result.map(row => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       name: row.name,
@@ -158,7 +151,7 @@ export class MySQLStorage
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map((row) => ({
+    return result.map(row => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
@@ -168,11 +161,7 @@ export class MySQLStorage
   }
 
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
-    const rows = await this.db
-      .select()
-      .from(appCheckpoints)
-      .orderBy(desc(appCheckpoints.createdAt))
-      .limit(1);
+    const rows = await this.db.select().from(appCheckpoints).orderBy(desc(appCheckpoints.createdAt)).limit(1);
     if (rows.length === 0) return null;
     return {
       id: rows[0].id.toString(),

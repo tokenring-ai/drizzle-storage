@@ -1,24 +1,23 @@
-import type {AppSessionCheckpoint, TokenRingService} from "@tokenring-ai/app/types";
+import type { AppSessionCheckpoint, TokenRingService } from "@tokenring-ai/app/types";
 import type {
   AgentCheckpointListItem,
   AgentCheckpointStorage,
   NamedAgentCheckpoint,
   StoredAgentCheckpoint,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
-import {desc, eq} from "drizzle-orm";
-import {drizzle as drizzlePostgres} from "drizzle-orm/postgres-js";
+import type { AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import { desc, eq } from "drizzle-orm";
+import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import {z} from "zod";
-import {agentCheckpoints, appCheckpoints} from "./schema.ts";
+import { z } from "zod";
+import { agentCheckpoints, appCheckpoints } from "./schema.ts";
 
 export const postgresStorageConfigSchema = z.object({
   type: z.literal("postgres"),
   connectionString: z.string(),
 });
 
-export class PostgresStorage
-  implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
+export class PostgresStorage implements TokenRingService, AgentCheckpointStorage, AppCheckpointStorage {
   name = "PostgresStorage";
   description = "PostgreSQL storage provider";
 
@@ -26,9 +25,7 @@ export class PostgresStorage
   db: ReturnType<typeof drizzlePostgres>;
   displayName: string;
 
-  constructor(
-    readonly config: z.infer<typeof postgresStorageConfigSchema>,
-  ) {
+  constructor(readonly config: z.infer<typeof postgresStorageConfigSchema>) {
     const url = new URL(config.connectionString);
     url.password = "***";
 
@@ -56,9 +53,7 @@ export class PostgresStorage
     //migratePostgres(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
   }
 
-  async storeAgentCheckpoint(
-    checkpoint: NamedAgentCheckpoint,
-  ): Promise<string> {
+  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
     const result = await this.db
       .insert(agentCheckpoints)
       .values({
@@ -69,13 +64,11 @@ export class PostgresStorage
         state: JSON.stringify(checkpoint.state),
         createdAt: checkpoint.createdAt,
       })
-      .returning({id: agentCheckpoints.id});
+      .returning({ id: agentCheckpoints.id });
     return result[0].id.toString();
   }
 
-  async retrieveAgentCheckpoint(
-    id: string,
-  ): Promise<StoredAgentCheckpoint | null> {
+  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
     const result = await this.db
       .select()
       .from(agentCheckpoints)
@@ -109,7 +102,7 @@ export class PostgresStorage
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map((row) => ({
+    return result.map(row => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       name: row.name,
@@ -129,7 +122,7 @@ export class PostgresStorage
         state: JSON.stringify(checkpoint.state),
         createdAt: checkpoint.createdAt,
       })
-      .returning({id: appCheckpoints.id});
+      .returning({ id: appCheckpoints.id });
     return result[0].id.toString();
   }
 
@@ -165,7 +158,7 @@ export class PostgresStorage
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map((row) => ({
+    return result.map(row => ({
       id: row.id.toString(),
       sessionId: row.sessionId,
       hostname: row.hostname,
@@ -175,11 +168,7 @@ export class PostgresStorage
   }
 
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
-    const rows = await this.db
-      .select()
-      .from(appCheckpoints)
-      .orderBy(desc(appCheckpoints.createdAt))
-      .limit(1);
+    const rows = await this.db.select().from(appCheckpoints).orderBy(desc(appCheckpoints.createdAt)).limit(1);
     if (rows.length === 0) return null;
     return {
       id: rows[0].id.toString(),
