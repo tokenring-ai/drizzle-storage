@@ -37,17 +37,32 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
 
   async start() {
     await this.db.execute(`
-        CREATE TABLE IF NOT EXISTS \`AgentState\`
+        CREATE TABLE IF NOT EXISTS \`AgentCheckpoints\`
         (
             \`id\`        bigint AUTO_INCREMENT NOT NULL,
+            \`sessionId\` text                  NOT NULL,
             \`agentId\`   text                  NOT NULL,
             \`name\`      text                  NOT NULL,
-            \`config\`    text                  NOT NULL,
+            \`agentType\` text                  NOT NULL,
             \`state\`     text                  NOT NULL,
             \`createdAt\` bigint                NOT NULL,
-            CONSTRAINT \`AgentState_id\` PRIMARY KEY (\`id\`)
+            CONSTRAINT \`AgentCheckpoints_id\` PRIMARY KEY (\`id\`)
         );
     `);
+
+    await this.db.execute(`
+        CREATE TABLE IF NOT EXISTS \`AppCheckpoints\`
+        (
+            \`id\`            bigint AUTO_INCREMENT NOT NULL,
+            \`sessionId\`     text                  NOT NULL,
+            \`hostname\`      text                  NOT NULL,
+            \`projectDirectory\` text NOT NULL,
+            \`state\`         text                  NOT NULL,
+            \`createdAt\`     bigint                NOT NULL,
+            CONSTRAINT \`AppCheckpoints_id\` PRIMARY KEY (\`id\`)
+        );
+    `);
+
     //TODO: Migrations do not work well due to bun packaging. We should fix this.
     //migrateMysql(db, {migrationsFolder: join(import.meta.dirname, "migrations")});
   }
