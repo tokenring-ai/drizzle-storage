@@ -37,28 +37,28 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
 
   async start() {
     await this.db.execute(`
-        CREATE TABLE IF NOT EXISTS "AgentCheckpoints"
-        (
-            "id"        bigserial PRIMARY KEY NOT NULL,
-            "sessionId" text                  NOT NULL,
-            "agentId"   text                  NOT NULL,
-            "name"      text                  NOT NULL,
-            "agentType" text                  NOT NULL,
-            "state"     text                  NOT NULL,
-            "createdAt" bigint                NOT NULL
-        );
+     CREATE TABLE IF NOT EXISTS "AgentCheckpoints"
+     (
+      "id" bigserial PRIMARY KEY NOT NULL,
+      "sessionId" text   NOT NULL,
+      "agentId"   text   NOT NULL,
+      "name"      text   NOT NULL,
+      "agentType" text   NOT NULL,
+      "state"     text   NOT NULL,
+      "createdAt" bigint NOT NULL
+     );
     `);
 
     await this.db.execute(`
-        CREATE TABLE IF NOT EXISTS "AppCheckpoints"
-        (
-            "id"            bigserial PRIMARY KEY NOT NULL,
-            "sessionId"     text                  NOT NULL,
-            "hostname"      text                  NOT NULL,
-            "projectDirectory" text NOT NULL,
-            "state"         text                  NOT NULL,
-            "createdAt"     bigint                NOT NULL
-        );
+     CREATE TABLE IF NOT EXISTS "AppCheckpoints"
+     (
+      "id" bigserial PRIMARY KEY NOT NULL,
+      "sessionId"        text   NOT NULL,
+      "hostname"         text   NOT NULL,
+      "projectDirectory" text   NOT NULL,
+      "state"            text   NOT NULL,
+      "createdAt"        bigint NOT NULL
+     );
     `);
 
     //TODO: Migrations do not work well due to bun packaging. We should fix this.

@@ -2,7 +2,10 @@
 
 ## Overview
 
-The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage backend for managing both agent state checkpoints and application session checkpoints across multiple database systems. It implements the `AgentCheckpointStorage` and `AppCheckpointStorage` interfaces with support for SQLite (Bun), MySQL, and PostgreSQL databases using Drizzle ORM for type-safe operations.
+The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage backend for managing both agent state
+checkpoints and application session checkpoints across multiple database systems. It implements the
+`AgentCheckpointStorage` and `AppCheckpointStorage` interfaces with support for SQLite (Bun), MySQL, and PostgreSQL
+databases using Drizzle ORM for type-safe operations.
 
 ### Key Features
 
@@ -38,17 +41,17 @@ bun install @tokenring-ai/drizzle-storage
 
 The package supports three database types, each with its own configuration schema:
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `type` | `"sqlite"` \| `"mysql"` \| `"postgres"` | Yes | Database type |
-| `databasePath` | `string` | SQLite only | Path to SQLite database file |
-| `connectionString` | `string` | MySQL/Postgres | Database connection string |
-| `migrationsFolder` | `string` | SQLite optional | Path to migrations folder |
+| Option             | Type                                    | Required        | Description                  |
+|--------------------|-----------------------------------------|-----------------|------------------------------|
+| `type`             | `"sqlite"` \| `"mysql"` \| `"postgres"` | Yes             | Database type                |
+| `databasePath`     | `string`                                | SQLite only     | Path to SQLite database file |
+| `connectionString` | `string`                                | MySQL/Postgres  | Database connection string   |
+| `migrationsFolder` | `string`                                | SQLite optional | Path to migrations folder    |
 
 ### Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
+| Variable       | Description                                 | Example                               |
+|----------------|---------------------------------------------|---------------------------------------|
 | `DATABASE_URL` | Database connection string (MySQL/Postgres) | `mysql://user:pass@localhost:3306/db` |
 
 ### Configuration Example
@@ -113,27 +116,27 @@ interface SQLiteStorageConfig {
 
 **Properties:**
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | `string` | Service name: "SQLiteStorage" |
-| `description` | `string` | Service description: "SQLite storage provider" |
-| `displayName` | `string` | Display name including database path |
-| `config` | `SQLiteStorageConfig` | Configuration object |
-| `sqlite` | `Database` | Bun SQLite database instance |
-| `db` | `DrizzleSQLiteDatabase` | Drizzle ORM database instance |
+| Property      | Type                    | Description                                    |
+|---------------|-------------------------|------------------------------------------------|
+| `name`        | `string`                | Service name: "SQLiteStorage"                  |
+| `description` | `string`                | Service description: "SQLite storage provider" |
+| `displayName` | `string`                | Display name including database path           |
+| `config`      | `SQLiteStorageConfig`   | Configuration object                           |
+| `sqlite`      | `Database`              | Bun SQLite database instance                   |
+| `db`          | `DrizzleSQLiteDatabase` | Drizzle ORM database instance                  |
 
 **Methods:**
 
-| Method | Description |
-|--------|-------------|
-| `start()` | Creates tables if they don't exist |
+| Method                             | Description                            |
+|------------------------------------|----------------------------------------|
+| `start()`                          | Creates tables if they don't exist     |
 | `storeAgentCheckpoint(checkpoint)` | Stores an agent checkpoint, returns ID |
-| `retrieveAgentCheckpoint(id)` | Retrieves an agent checkpoint by ID |
-| `listAgentCheckpoints()` | Lists all agent checkpoints |
-| `storeAppCheckpoint(checkpoint)` | Stores an app checkpoint, returns ID |
-| `retrieveAppCheckpoint(id)` | Retrieves an app checkpoint by ID |
-| `listAppCheckpoints()` | Lists all app checkpoints |
-| `retrieveLatestAppCheckpoint()` | Retrieves the latest app checkpoint |
+| `retrieveAgentCheckpoint(id)`      | Retrieves an agent checkpoint by ID    |
+| `listAgentCheckpoints()`           | Lists all agent checkpoints            |
+| `storeAppCheckpoint(checkpoint)`   | Stores an app checkpoint, returns ID   |
+| `retrieveAppCheckpoint(id)`        | Retrieves an app checkpoint by ID      |
+| `listAppCheckpoints()`             | Lists all app checkpoints              |
+| `retrieveLatestAppCheckpoint()`    | Retrieves the latest app checkpoint    |
 
 #### MySQLStorage
 
@@ -150,14 +153,14 @@ interface MySQLStorageConfig {
 
 **Properties:**
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | `string` | Service name: "MySQLStorage" |
-| `description` | `string` | Service description: "MySQL storage provider" |
-| `displayName` | `string` | Display name including connection URL |
-| `config` | `MySQLStorageConfig` | Configuration object |
-| `connection` | `mysql.Pool` | MySQL connection pool |
-| `db` | `MySql2Database` | Drizzle ORM database instance |
+| Property      | Type                 | Description                                   |
+|---------------|----------------------|-----------------------------------------------|
+| `name`        | `string`             | Service name: "MySQLStorage"                  |
+| `description` | `string`             | Service description: "MySQL storage provider" |
+| `displayName` | `string`             | Display name including connection URL         |
+| `config`      | `MySQLStorageConfig` | Configuration object                          |
+| `connection`  | `mysql.Pool`         | MySQL connection pool                         |
+| `db`          | `MySql2Database`     | Drizzle ORM database instance                 |
 
 #### PostgresStorage
 
@@ -174,14 +177,14 @@ interface PostgresStorageConfig {
 
 **Properties:**
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | `string` | Service name: "PostgresStorage" |
-| `description` | `string` | Service description: "PostgreSQL storage provider" |
-| `displayName` | `string` | Display name including connection URL |
-| `config` | `PostgresStorageConfig` | Configuration object |
-| `connection` | `postgres.Sql` | PostgreSQL connection |
-| `db` | `DrizzlePostgresDatabase` | Drizzle ORM database instance |
+| Property      | Type                      | Description                                        |
+|---------------|---------------------------|----------------------------------------------------|
+| `name`        | `string`                  | Service name: "PostgresStorage"                    |
+| `description` | `string`                  | Service description: "PostgreSQL storage provider" |
+| `displayName` | `string`                  | Display name including connection URL              |
+| `config`      | `PostgresStorageConfig`   | Configuration object                               |
+| `connection`  | `postgres.Sql`            | PostgreSQL connection                              |
+| `db`          | `DrizzlePostgresDatabase` | Drizzle ORM database instance                      |
 
 ### Provider Documentation
 
@@ -192,8 +195,11 @@ All storage providers implement the same interfaces:
 ```typescript
 interface AgentCheckpointStorage {
   start?(): Promise<void>;
+
   storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
+
   retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
+
   listAgentCheckpoints(): Promise<AgentCheckpointListItem[]>;
 }
 ```
@@ -203,24 +209,29 @@ interface AgentCheckpointStorage {
 ```typescript
 interface AppCheckpointStorage {
   start?(): Promise<void>;
+
   storeAppCheckpoint(data: AppSessionCheckpoint): Promise<string>;
+
   retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null>;
+
   listAppCheckpoints(): Promise<AppSessionListItem[]>;
+
   retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null>;
 }
 ```
 
 ### RPC Endpoints
 
-This package does not define RPC endpoints directly. It provides storage services that are used by other packages implementing RPC functionality.
+This package does not define RPC endpoints directly. It provides storage services that are used by other packages
+implementing RPC functionality.
 
 ### Usage Examples
 
 #### Direct Usage - Agent Checkpoints
 
 ```typescript
-import { SQLiteStorage } from '@tokenring-ai/drizzle-storage';
-import type { NamedAgentCheckpoint } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import {SQLiteStorage} from '@tokenring-ai/drizzle-storage';
+import type {NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 
 const storage = new SQLiteStorage({
   type: "sqlite",
@@ -314,29 +325,30 @@ bun test --watch
 bun test --coverage
 ```
 
-**Note:** Tests require Bun runtime because the SQLite implementation uses `bun:sqlite`. MySQL and PostgreSQL tests are currently skipped as they require Docker/testcontainers.
+**Note:** Tests require Bun runtime because the SQLite implementation uses `bun:sqlite`. MySQL and PostgreSQL tests are
+currently skipped as they require Docker/testcontainers.
 
 ### Dependencies
 
 #### Runtime Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `@tokenring-ai/app` | 0.2.0 | Token Ring application framework |
-| `@tokenring-ai/checkpoint` | 0.2.0 | Checkpoint interfaces |
-| `drizzle-orm` | ^0.45.2 | Type-safe ORM |
-| `mysql2` | ^3.20.0 | MySQL driver |
-| `postgres` | ^3.4.9 | PostgreSQL driver |
-| `zod` | ^4.3.6 | Schema validation |
+| Package                    | Version | Purpose                          |
+|----------------------------|---------|----------------------------------|
+| `@tokenring-ai/app`        | 0.2.0   | Token Ring application framework |
+| `@tokenring-ai/checkpoint` | 0.2.0   | Checkpoint interfaces            |
+| `drizzle-orm`              | ^0.45.2 | Type-safe ORM                    |
+| `mysql2`                   | ^3.20.0 | MySQL driver                     |
+| `postgres`                 | ^3.4.9  | PostgreSQL driver                |
+| `zod`                      | ^4.3.6  | Schema validation                |
 
 #### Development Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `drizzle-kit` | ^0.31.10 | Migration generator |
-| `vitest` | ^4.1.1 | Testing framework |
-| `bun-types` | ^1.3.11 | Bun TypeScript definitions |
-| `typescript` | ^6.0.2 | TypeScript compiler |
+| Package       | Version  | Purpose                    |
+|---------------|----------|----------------------------|
+| `drizzle-kit` | ^0.31.10 | Migration generator        |
+| `vitest`      | ^4.1.1   | Testing framework          |
+| `bun-types`   | ^1.3.11  | Bun TypeScript definitions |
+| `typescript`  | ^6.0.2   | TypeScript compiler        |
 
 ### Schema Documentation
 
@@ -388,26 +400,26 @@ All database types use the same logical schema with two tables: `AgentCheckpoint
 
 #### AgentCheckpoints Table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Integer/BigInt | Auto-incrementing primary key |
-| `sessionId` | Text | Session identifier |
-| `agentId` | Text | Agent identifier |
-| `agentType` | Text | Type of agent (e.g., "coder", "writer") |
-| `name` | Text | Checkpoint name |
-| `state` | Text | JSON-serialized state data |
-| `createdAt` | Integer/BigInt | Unix timestamp |
+| Column      | Type           | Description                             |
+|-------------|----------------|-----------------------------------------|
+| `id`        | Integer/BigInt | Auto-incrementing primary key           |
+| `sessionId` | Text           | Session identifier                      |
+| `agentId`   | Text           | Agent identifier                        |
+| `agentType` | Text           | Type of agent (e.g., "coder", "writer") |
+| `name`      | Text           | Checkpoint name                         |
+| `state`     | Text           | JSON-serialized state data              |
+| `createdAt` | Integer/BigInt | Unix timestamp                          |
 
 #### AppCheckpoints Table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Integer/BigInt | Auto-incrementing primary key |
-| `sessionId` | Text | Session identifier |
-| `hostname` | Text | Hostname of the application |
-| `projectDirectory` | Text | Current working directory |
-| `state` | Text | JSON-serialized state data |
-| `createdAt` | Integer/BigInt | Unix timestamp |
+| Column             | Type           | Description                   |
+|--------------------|----------------|-------------------------------|
+| `id`               | Integer/BigInt | Auto-incrementing primary key |
+| `sessionId`        | Text           | Session identifier            |
+| `hostname`         | Text           | Hostname of the application   |
+| `projectDirectory` | Text           | Current working directory     |
+| `state`            | Text           | JSON-serialized state data    |
+| `createdAt`        | Integer/BigInt | Unix timestamp                |
 
 ### Project Structure
 
@@ -437,16 +449,16 @@ pkg/drizzle-storage/
 
 ### Scripts
 
-| Script | Description |
-|--------|-------------|
-| `test` | Run all tests |
-| `test:watch` | Run tests in watch mode |
-| `test:coverage` | Run tests with coverage |
-| `db:generate` | Generate migrations for all databases |
-| `db:generate:sqlite` | Generate SQLite migrations |
-| `db:generate:postgres` | Generate PostgreSQL migrations |
-| `db:generate:mysql` | Generate MySQL migrations |
-| `build` | Type check with TypeScript |
+| Script                 | Description                           |
+|------------------------|---------------------------------------|
+| `test`                 | Run all tests                         |
+| `test:watch`           | Run tests in watch mode               |
+| `test:coverage`        | Run tests with coverage               |
+| `db:generate`          | Generate migrations for all databases |
+| `db:generate:sqlite`   | Generate SQLite migrations            |
+| `db:generate:postgres` | Generate PostgreSQL migrations        |
+| `db:generate:mysql`    | Generate MySQL migrations             |
+| `build`                | Type check with TypeScript            |
 
 ### Related Components
 

@@ -1,16 +1,16 @@
-import {AgentCheckpointStorage, NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import {AppCheckpointStorage, AppSessionCheckpoint} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
-import {afterAll, describe, expect, it} from "vitest";
+import { AgentCheckpointStorage, NamedAgentCheckpoint } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import { AppCheckpointStorage, AppSessionCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import { afterAll, describe, expect, it } from "vitest";
 
 const isBun = typeof Bun !== "undefined";
 
 /**
  * DrizzleStorage Tests
- * 
+ *
  * Note: These tests require Bun runtime because the SQLite storage implementation
  * uses Bun's native `bun:sqlite` module. Tests will be skipped when running in
  * Node.js environment.
- * 
+ *
  * To run these tests:
  * 1. Use Bun runtime: `bun test`
  * 2. MySQL/Postgres tests require Docker/testcontainers
@@ -31,7 +31,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
 
     beforeAll(async () => {
       // Use dynamic import to avoid bun:sqlite import error in Node.js
-      const {SQLiteStorage} = await import("./sqlite/createSQLiteStorage.js");
+      const { SQLiteStorage } = await import("./sqlite/createSQLiteStorage.js");
       storage = new SQLiteStorage({
         type: "sqlite",
         databasePath: dbPath,
@@ -41,7 +41,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
 
     afterAll(async () => {
       // Cleanup: remove test database file
-      const {unlinkSync, existsSync} = await import("node:fs");
+      const { unlinkSync, existsSync } = await import("node:fs");
       if (existsSync(dbPath)) {
         unlinkSync(dbPath);
       }
@@ -58,7 +58,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
         sessionId: "session-1",
         agentType: "general",
         name: "session-1",
-        state: {agentState: {messages: {hello: "world"}}, toolsEnabled: ["foo"], hooksEnabled: ["bar"]},
+        state: { agentState: { messages: { hello: "world" } }, toolsEnabled: ["foo"], hooksEnabled: ["bar"] },
         createdAt: Date.now(),
       };
 
@@ -97,7 +97,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
         sessionId: "session-2",
         agentType: "general",
         name: "session-2",
-        state: {messages: {test: "value1"}},
+        state: { messages: { test: "value1" } },
         createdAt: Date.now(),
       };
 
@@ -106,7 +106,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
         sessionId: "session-3",
         agentType: "specialized",
         name: "session-3",
-        state: {messages: {test: "value2"}},
+        state: { messages: { test: "value2" } },
         createdAt: Date.now(),
       };
 
@@ -124,8 +124,8 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
       const complexState = {
         agentState: {
           messages: [
-            {role: "user", content: "Hello"},
-            {role: "assistant", content: "Hi there!"},
+            { role: "user", content: "Hello" },
+            { role: "assistant", content: "Hi there!" },
           ],
           toolsEnabled: ["tool1", "tool2"],
           hooksEnabled: ["hook1"],
@@ -158,7 +158,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
 
     beforeAll(async () => {
       // Use dynamic import to avoid bun:sqlite import error in Node.js
-      const {SQLiteStorage} = await import("./sqlite/createSQLiteStorage.js");
+      const { SQLiteStorage } = await import("./sqlite/createSQLiteStorage.js");
       storage = new SQLiteStorage({
         type: "sqlite",
         databasePath: dbPath,
@@ -168,7 +168,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
 
     afterAll(async () => {
       // Cleanup: remove test database file
-      const {unlinkSync, existsSync} = await import("node:fs");
+      const { unlinkSync, existsSync } = await import("node:fs");
       if (existsSync(dbPath)) {
         unlinkSync(dbPath);
       }
@@ -179,7 +179,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
         sessionId: "app-session-1",
         hostname: "localhost",
         projectDirectory: "/test/project",
-        state: {activeTools: ["tool1"], settings: {theme: "dark"}},
+        state: { activeTools: ["tool1"], settings: { theme: "dark" } },
         createdAt: Date.now(),
       };
 
@@ -217,7 +217,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
         sessionId: "app-session-1",
         hostname: "localhost",
         projectDirectory: "/test/project",
-        state: {activeTools: ["tool1"]},
+        state: { activeTools: ["tool1"] },
         createdAt: Date.now() - 1000,
       };
 
@@ -225,7 +225,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
         sessionId: "app-session-2",
         hostname: "localhost",
         projectDirectory: "/test/project",
-        state: {activeTools: ["tool2"]},
+        state: { activeTools: ["tool2"] },
         createdAt: Date.now(),
       };
 

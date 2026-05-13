@@ -34,28 +34,28 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
 
   start() {
     this.db.run(`
-        CREATE TABLE IF NOT EXISTS \`AgentCheckpoints\`
-        (
-            \`id\`        integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-            \`sessionId\` text                              NOT NULL,
-            \`agentId\`   text                              NOT NULL,
-            \`agentType\` text                              NOT NULL,
-            \`name\`      text                              NOT NULL,
-            \`state\`     text                              NOT NULL,
-            \`createdAt\` integer                           NOT NULL
-        );
+     CREATE TABLE IF NOT EXISTS \`AgentCheckpoints\`
+     (
+      \`id\`        integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      \`sessionId\` text    NOT NULL,
+      \`agentId\`   text    NOT NULL,
+      \`agentType\` text    NOT NULL,
+      \`name\`      text    NOT NULL,
+      \`state\`     text    NOT NULL,
+      \`createdAt\` integer NOT NULL
+     );
     `);
 
     this.db.run(`
-        CREATE TABLE IF NOT EXISTS \`AppCheckpoints\`
-        (
-            \`id\`            integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-            \`sessionId\`     text                              NOT NULL,
-            \`hostname\`      text                              NOT NULL,
-            \`projectDirectory\` text NOT NULL,
-            \`state\`         text                              NOT NULL,
-            \`createdAt\`     integer                           NOT NULL
-        );
+     CREATE TABLE IF NOT EXISTS \`AppCheckpoints\`
+     (
+      \`id\`               integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      \`sessionId\`        text    NOT NULL,
+      \`hostname\`         text    NOT NULL,
+      \`projectDirectory\` text    NOT NULL,
+      \`state\`            text    NOT NULL,
+      \`createdAt\`        integer NOT NULL
+     );
     `);
 
     //TODO: Migrations do not work well due to bun packaging. We should fix this.
