@@ -2,10 +2,7 @@
 
 ## Overview
 
-The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage backend for managing both agent state
-checkpoints and application session checkpoints across multiple database systems. It implements the
-`AgentCheckpointStorage` and `AppCheckpointStorage` interfaces with support for SQLite (Bun), MySQL, and PostgreSQL
-databases using Drizzle ORM for type-safe operations.
+The `@tokenring-ai/drizzle-storage` package provides a robust, type-safe storage backend for managing both agent state checkpoints and application session checkpoints across multiple database systems. It implements the `AgentCheckpointStorage` and `AppCheckpointStorage` interfaces with support for SQLite (Bun), MySQL, and PostgreSQL databases using Drizzle ORM for type-safe operations.
 
 ### Key Features
 
@@ -22,7 +19,7 @@ databases using Drizzle ORM for type-safe operations.
 ## Installation
 
 ```bash
-bun install @tokenring-ai/drizzle-storage
+bun add @tokenring-ai/drizzle-storage
 ```
 
 ## Features
@@ -34,6 +31,14 @@ bun install @tokenring-ai/drizzle-storage
 - Multi-database support with consistent API across all providers
 - Automatic table creation on initialization
 - Type-safe configuration validation with Zod schemas
+
+## Chat Commands
+
+This package does not define any chat commands.
+
+## Tools
+
+This package does not define any tools.
 
 ## Configuration
 
@@ -50,9 +55,7 @@ The package supports three database types, each with its own configuration schem
 
 ### Environment Variables
 
-| Variable       | Description                                 | Example                               |
-|----------------|---------------------------------------------|---------------------------------------|
-| `DATABASE_URL` | Database connection string (MySQL/Postgres) | `mysql://user:pass@localhost:3306/db` |
+This package does not define any environment variables. Configuration is provided through the plugin configuration.
 
 ### Configuration Example
 
@@ -127,16 +130,16 @@ interface SQLiteStorageConfig {
 
 **Methods:**
 
-| Method                             | Description                            |
-|------------------------------------|----------------------------------------|
-| `start()`                          | Creates tables if they don't exist     |
-| `storeAgentCheckpoint(checkpoint)` | Stores an agent checkpoint, returns ID |
-| `retrieveAgentCheckpoint(id)`      | Retrieves an agent checkpoint by ID    |
-| `listAgentCheckpoints()`           | Lists all agent checkpoints            |
-| `storeAppCheckpoint(checkpoint)`   | Stores an app checkpoint, returns ID   |
-| `retrieveAppCheckpoint(id)`        | Retrieves an app checkpoint by ID      |
-| `listAppCheckpoints()`             | Lists all app checkpoints              |
-| `retrieveLatestAppCheckpoint()`    | Retrieves the latest app checkpoint    |
+| Method                                        | Description                            |
+|-----------------------------------------------|----------------------------------------|
+| `start()`                                     | Creates tables if they don't exist     |
+| `storeAgentCheckpoint(checkpoint)`            | Stores an agent checkpoint, returns ID |
+| `retrieveAgentCheckpoint(id)`                 | Retrieves an agent checkpoint by ID    |
+| `listAgentCheckpoints()`                      | Lists all agent checkpoints            |
+| `storeAppCheckpoint(checkpoint)`              | Stores an app checkpoint, returns ID   |
+| `retrieveAppCheckpoint(id)`                   | Retrieves an app checkpoint by ID      |
+| `listAppCheckpoints()`                        | Lists all app checkpoints              |
+| `retrieveLatestAppCheckpoint()`               | Retrieves the latest app checkpoint    |
 
 #### MySQLStorage
 
@@ -222,16 +225,15 @@ interface AppCheckpointStorage {
 
 ### RPC Endpoints
 
-This package does not define RPC endpoints directly. It provides storage services that are used by other packages
-implementing RPC functionality.
+This package does not define RPC endpoints directly. It provides storage services that are used by other packages implementing RPC functionality.
 
 ### Usage Examples
 
 #### Direct Usage - Agent Checkpoints
 
 ```typescript
-import {SQLiteStorage} from '@tokenring-ai/drizzle-storage';
-import type {NamedAgentCheckpoint} from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import { SQLiteStorage } from '@tokenring-ai/drizzle-storage';
+import type { NamedAgentCheckpoint } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 
 const storage = new SQLiteStorage({
   type: "sqlite",
@@ -325,8 +327,7 @@ bun test --watch
 bun test --coverage
 ```
 
-**Note:** Tests require Bun runtime because the SQLite implementation uses `bun:sqlite`. MySQL and PostgreSQL tests are
-currently skipped as they require Docker/testcontainers.
+**Note:** Tests require Bun runtime because the SQLite implementation uses `bun:sqlite`. MySQL and PostgreSQL tests are currently skipped as they require Docker/testcontainers.
 
 ### Dependencies
 
@@ -425,26 +426,26 @@ All database types use the same logical schema with two tables: `AgentCheckpoint
 
 ```text
 pkg/drizzle-storage/
-├── index.ts                    # Package entry point with exports
-├── plugin.ts                   # TokenRingPlugin implementation
-├── schema.ts                   # Combined configuration schema
-├── package.json                # Dependencies and scripts
-├── README.md                   # Documentation
-├── DrizzleAgentStateStorage.test.ts  # Test suite
-├── vitest.config.ts            # Test configuration
-├── LICENSE                     # MIT License
-├── sqlite/                     # SQLite implementation
-│   ├── createSQLiteStorage.ts  # SQLiteStorage class
-│   ├── schema.ts               # Drizzle schema
-│   └── drizzle.config.ts       # Drizzle configuration
-├── mysql/                      # MySQL implementation
-│   ├── createMySQLStorage.ts   # MySQLStorage class
-│   ├── schema.ts               # Drizzle schema
-│   └── drizzle.config.ts       # Drizzle configuration
-└── postgres/                   # PostgreSQL implementation
-    ├── createPostgresStorage.ts # PostgresStorage class
-    ├── schema.ts               # Drizzle schema
-    └── drizzle.config.ts       # Drizzle configuration
+├── index.ts                                    # Package entry point with exports
+├── plugin.ts                                   # TokenRingPlugin implementation
+├── schema.ts                                   # Combined configuration schema
+├── package.json                                # Dependencies and scripts
+├── README.md                                   # Documentation
+├── DrizzleAgentStateStorage.test.ts            # Test suite
+├── vitest.config.ts                            # Test configuration
+├── LICENSE                                     # MIT License
+├── sqlite/                                     # SQLite implementation
+│   ├── createSQLiteStorage.ts                  # SQLiteStorage class
+│   ├── schema.ts                               # Drizzle schema
+│   └── drizzle.config.ts                       # Drizzle configuration
+├── mysql/                                      # MySQL implementation
+│   ├── createMySQLStorage.ts                   # MySQLStorage class
+│   ├── schema.ts                               # Drizzle schema
+│   └── drizzle.config.ts                       # Drizzle configuration
+└── postgres/                                   # PostgreSQL implementation
+    ├── createPostgresStorage.ts                # PostgresStorage class
+    ├── schema.ts                               # Drizzle schema
+    └── drizzle.config.ts                       # Drizzle configuration
 ```
 
 ### Scripts
