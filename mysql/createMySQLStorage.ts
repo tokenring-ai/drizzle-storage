@@ -1,11 +1,18 @@
-import type { AppSessionCheckpoint, TokenRingService } from "@tokenring-ai/app/types";
-import type {
-  AgentCheckpointListItem,
-  AgentCheckpointStorage,
-  NamedAgentCheckpoint,
-  StoredAgentCheckpoint,
+import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
+import type { TokenRingService } from "@tokenring-ai/app/types";
+import {
+  type AgentCheckpointListItem,
+  type AgentCheckpointStorage,
+  type NamedAgentCheckpoint,
+  type StoredAgentCheckpoint,
+  StoredAgentCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import type { AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
+import {
+  type AppCheckpointStorage,
+  type AppSessionListItem,
+  type StoredAppCheckpoint,
+  StoredAppCheckpointSchema
+} from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import { desc, eq } from "drizzle-orm";
 import { drizzle as drizzleMysql, type MySql2Database } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
@@ -76,7 +83,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
       state: JSON.stringify(checkpoint.state),
       createdAt: checkpoint.createdAt,
     });
-    return result[0].insertId.toString();
+    return StoredAgentCheckpointSchema.shape.id.parse(result[0].insertId);
   }
 
   async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
@@ -88,16 +95,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
 
     if (result.length === 0) return null;
 
-    const row = result[0];
-    return {
-      id: row.id.toString(),
-      name: row.name,
-      agentId: row.agentId,
-      sessionId: row.sessionId,
-      agentType: row.agentType,
-      state: JSON.parse(row.state),
-      createdAt: Number(row.createdAt),
-    };
+    return StoredAgentCheckpointSchema.parse(result[0]);
   }
 
   async listAgentCheckpoints(): Promise<AgentCheckpointListItem[]> {
@@ -113,14 +111,9 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map(row => ({
-      id: row.id.toString(),
-      sessionId: row.sessionId,
-      name: row.name,
-      agentId: row.agentId,
-      agentType: row.agentType,
-      createdAt: Number(row.createdAt),
-    }));
+    return result.map(row =>
+      StoredAgentCheckpointSchema.pick(["id", "sessionId", "name", "agentId", "agentType", "createdAt"]).parse(row)
+    );
   }
 
   async storeAppCheckpoint(checkpoint: AppSessionCheckpoint): Promise<string> {
@@ -131,7 +124,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
       state: JSON.stringify(checkpoint.state),
       createdAt: checkpoint.createdAt,
     });
-    return result[0].insertId.toString();
+    return StoredAgentCheckpointSchema.shape.id.parse(result[0].insertId);
   }
 
   async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
@@ -143,15 +136,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
 
     if (result.length === 0) return null;
 
-    const row = result[0];
-    return {
-      id: row.id.toString(),
-      sessionId: row.sessionId,
-      hostname: row.hostname,
-      projectDirectory: row.projectDirectory,
-      state: JSON.parse(row.state),
-      createdAt: Number(row.createdAt),
-    };
+    return StoredAppCheckpointSchema.parse(result[0]);
   }
 
   async listAppCheckpoints(): Promise<AppSessionListItem[]> {
@@ -166,25 +151,14 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map(row => ({
-      id: row.id.toString(),
-      sessionId: row.sessionId,
-      hostname: row.hostname,
-      projectDirectory: row.projectDirectory,
-      createdAt: Number(row.createdAt),
-    }));
+    return result.map(row =>
+      StoredAppCheckpointSchema.pick(["id", "sessionId", "hostname", "projectDirectory", "createdAt"]).parse(row)
+    );
   }
 
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
     const rows = await this.db.select().from(appCheckpoints).orderBy(desc(appCheckpoints.createdAt)).limit(1);
     if (rows.length === 0) return null;
-    return {
-      id: rows[0].id.toString(),
-      sessionId: rows[0].sessionId,
-      hostname: rows[0].hostname,
-      projectDirectory: rows[0].projectDirectory,
-      state: JSON.parse(rows[0].state),
-      createdAt: Number(rows[0].createdAt),
-    };
+    return StoredAppCheckpointSchema.parse(rows[0]);
   }
 }
