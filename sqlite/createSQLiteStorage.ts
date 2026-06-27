@@ -69,7 +69,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     //migrateSqlite(db, {migrationsFolder: join(import.meta.dirname, "migrations"), });
   }
 
-  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<string> {
+  async storeAgentCheckpoint(checkpoint: NamedAgentCheckpoint): Promise<number> {
     const result = await this.db
       .insert(agentCheckpoints)
       .values({
@@ -85,11 +85,11 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     return StoredAgentCheckpointSchema.shape.id.parse(result[0].id);
   }
 
-  async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null> {
+  async retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null> {
     const result = await this.db
       .select()
       .from(agentCheckpoints)
-      .where(eq(agentCheckpoints.id, Number(id)))
+      .where(eq(agentCheckpoints.id, id))
       .limit(1);
 
     if (result.length === 0) return null;
@@ -115,7 +115,7 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     );
   }
 
-  async storeAppCheckpoint(checkpoint: AppSessionCheckpoint): Promise<string> {
+  async storeAppCheckpoint(checkpoint: AppSessionCheckpoint): Promise<number> {
     const result = await this.db
       .insert(appCheckpoints)
       .values({
@@ -129,11 +129,11 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     return StoredAgentCheckpointSchema.shape.id.parse(result[0].id);
   }
 
-  async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
+  async retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null> {
     const result = await this.db
       .select()
       .from(appCheckpoints)
-      .where(eq(appCheckpoints.id, Number(id)))
+      .where(eq(appCheckpoints.id, id))
       .limit(1);
 
     if (result.length === 0) return null;

@@ -199,9 +199,9 @@ All storage providers implement the same interfaces:
 interface AgentCheckpointStorage {
   start?(): Promise<void>;
 
-  storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
+  storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<number>;
 
-  retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
+  retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null>;
 
   listAgentCheckpoints(): Promise<AgentCheckpointListItem[]>;
 }
@@ -213,9 +213,9 @@ interface AgentCheckpointStorage {
 interface AppCheckpointStorage {
   start?(): Promise<void>;
 
-  storeAppCheckpoint(data: AppSessionCheckpoint): Promise<string>;
+  storeAppCheckpoint(data: AppSessionCheckpoint): Promise<number>;
 
-  retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null>;
+  retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null>;
 
   listAppCheckpoints(): Promise<AppSessionListItem[]>;
 
