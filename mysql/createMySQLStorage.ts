@@ -5,13 +5,15 @@ import {
   type AgentCheckpointStorage,
   type NamedAgentCheckpoint,
   type StoredAgentCheckpoint,
+  AgentCheckpointListItemSchema,
   StoredAgentCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 import {
   type AppCheckpointStorage,
   type AppSessionListItem,
   type StoredAppCheckpoint,
-  StoredAppCheckpointSchema
+  AppCheckpointListItemSchema,
+  StoredAppCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import { desc, eq } from "drizzle-orm";
 import { drizzle as drizzleMysql, type MySql2Database } from "drizzle-orm/mysql2";
@@ -111,9 +113,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
       .from(agentCheckpoints)
       .orderBy(desc(agentCheckpoints.createdAt));
 
-    return result.map(row =>
-      StoredAgentCheckpointSchema.pick(["id", "sessionId", "name", "agentId", "agentType", "createdAt"]).parse(row)
-    );
+    return result.map(row => AgentCheckpointListItemSchema.parse(row));
   }
 
   async storeAppCheckpoint(checkpoint: AppSessionCheckpoint): Promise<number> {
@@ -151,9 +151,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
       .from(appCheckpoints)
       .orderBy(desc(appCheckpoints.createdAt));
 
-    return result.map(row =>
-      StoredAppCheckpointSchema.pick(["id", "sessionId", "hostname", "projectDirectory", "createdAt"]).parse(row)
-    );
+    return result.map(row => AppCheckpointListItemSchema.parse(row));
   }
 
   async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {

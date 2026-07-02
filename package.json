@@ -5,9 +5,9 @@
   "dependencies": {
     "@tokenring-ai/app": "workspace:*",
     "@tokenring-ai/checkpoint": "workspace:*",
-    "zod": "^4.3.6",
+    "zod": "^4.4.3",
     "drizzle-orm": "^0.45.2",
-    "mysql2": "^3.20.0",
+    "mysql2": "^3.22.5",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
