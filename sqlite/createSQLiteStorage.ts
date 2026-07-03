@@ -2,17 +2,17 @@ import { type AppSessionCheckpoint } from "@tokenring-ai/app/schema";
 import type { TokenRingService } from "@tokenring-ai/app/types";
 import {
   type AgentCheckpointListItem,
+  AgentCheckpointListItemSchema,
   type AgentCheckpointStorage,
   type NamedAgentCheckpoint,
   type StoredAgentCheckpoint,
-  AgentCheckpointListItemSchema,
   StoredAgentCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 import {
+  AppCheckpointListItemSchema,
   type AppCheckpointStorage,
   type AppSessionListItem,
   type StoredAppCheckpoint,
-  AppCheckpointListItemSchema,
   StoredAppCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import Database from "bun:sqlite";
@@ -45,25 +45,70 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
     this.db.run(`
      CREATE TABLE IF NOT EXISTS \`AgentCheckpoints\`
      (
-      \`id\`        integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-      \`sessionId\` text    NOT NULL,
-      \`agentId\`   text    NOT NULL,
-      \`agentType\` text    NOT NULL,
-      \`name\`      text    NOT NULL,
-      \`state\`     text    NOT NULL,
-      \`createdAt\` integer NOT NULL
+      \`id\`
+      integer
+      PRIMARY
+      KEY
+      AUTOINCREMENT
+      NOT
+      NULL,
+      \`sessionId\`
+      text
+      NOT
+      NULL,
+      \`agentId\`
+      text
+      NOT
+      NULL,
+      \`agentType\`
+      text
+      NOT
+      NULL,
+      \`name\`
+      text
+      NOT
+      NULL,
+      \`state\`
+      text
+      NOT
+      NULL,
+      \`createdAt\`
+      integer
+      NOT
+      NULL
      );
     `);
 
     this.db.run(`
      CREATE TABLE IF NOT EXISTS \`AppCheckpoints\`
      (
-      \`id\`               integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-      \`sessionId\`        text    NOT NULL,
-      \`hostname\`         text    NOT NULL,
-      \`projectDirectory\` text    NOT NULL,
-      \`state\`            text    NOT NULL,
-      \`createdAt\`        integer NOT NULL
+      \`id\`
+      integer
+      PRIMARY
+      KEY
+      AUTOINCREMENT
+      NOT
+      NULL,
+      \`sessionId\`
+      text
+      NOT
+      NULL,
+      \`hostname\`
+      text
+      NOT
+      NULL,
+      \`projectDirectory\`
+      text
+      NOT
+      NULL,
+      \`state\`
+      text
+      NOT
+      NULL,
+      \`createdAt\`
+      integer
+      NOT
+      NULL
      );
     `);
 
@@ -83,16 +128,15 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
         createdAt: checkpoint.createdAt,
       })
       .returning({ id: agentCheckpoints.id });
+    if (!result[0]) {
+      throw new Error("No data returned from database");
+    }
 
     return StoredAgentCheckpointSchema.shape.id.parse(result[0].id);
   }
 
   async retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null> {
-    const result = await this.db
-      .select()
-      .from(agentCheckpoints)
-      .where(eq(agentCheckpoints.id, id))
-      .limit(1);
+    const result = await this.db.select().from(agentCheckpoints).where(eq(agentCheckpoints.id, id)).limit(1);
 
     if (result.length === 0) return null;
 
@@ -126,15 +170,15 @@ export class SQLiteStorage implements TokenRingService, AgentCheckpointStorage, 
         createdAt: checkpoint.createdAt,
       })
       .returning({ id: appCheckpoints.id });
+
+    if (!result[0]) {
+      throw new Error("No data returned from database");
+    }
     return StoredAgentCheckpointSchema.shape.id.parse(result[0].id);
   }
 
   async retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null> {
-    const result = await this.db
-      .select()
-      .from(appCheckpoints)
-      .where(eq(appCheckpoints.id, id))
-      .limit(1);
+    const result = await this.db.select().from(appCheckpoints).where(eq(appCheckpoints.id, id)).limit(1);
 
     if (result.length === 0) return null;
 

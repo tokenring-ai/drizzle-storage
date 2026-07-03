@@ -2,17 +2,17 @@ import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
 import type { TokenRingService } from "@tokenring-ai/app/types";
 import {
   type AgentCheckpointListItem,
+  AgentCheckpointListItemSchema,
   type AgentCheckpointStorage,
   type NamedAgentCheckpoint,
   type StoredAgentCheckpoint,
-  AgentCheckpointListItemSchema,
   StoredAgentCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 import {
+  AppCheckpointListItemSchema,
   type AppCheckpointStorage,
   type AppSessionListItem,
   type StoredAppCheckpoint,
-  AppCheckpointListItemSchema,
   StoredAppCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import { desc, eq } from "drizzle-orm";
@@ -89,11 +89,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
   }
 
   async retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null> {
-    const result = await this.db
-      .select()
-      .from(agentCheckpoints)
-      .where(eq(agentCheckpoints.id, id))
-      .limit(1);
+    const result = await this.db.select().from(agentCheckpoints).where(eq(agentCheckpoints.id, id)).limit(1);
 
     if (result.length === 0) return null;
 
@@ -128,11 +124,7 @@ export class MySQLStorage implements TokenRingService, AgentCheckpointStorage, A
   }
 
   async retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null> {
-    const result = await this.db
-      .select()
-      .from(appCheckpoints)
-      .where(eq(appCheckpoints.id, id))
-      .limit(1);
+    const result = await this.db.select().from(appCheckpoints).where(eq(appCheckpoints.id, id)).limit(1);
 
     if (result.length === 0) return null;
 

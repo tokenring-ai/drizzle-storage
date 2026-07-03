@@ -2,17 +2,17 @@ import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
 import type { TokenRingService } from "@tokenring-ai/app/types";
 import {
   type AgentCheckpointListItem,
+  AgentCheckpointListItemSchema,
   type AgentCheckpointStorage,
   type NamedAgentCheckpoint,
   type StoredAgentCheckpoint,
-  AgentCheckpointListItemSchema,
   StoredAgentCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
 import {
+  AppCheckpointListItemSchema,
   type AppCheckpointStorage,
   type AppSessionListItem,
   type StoredAppCheckpoint,
-  AppCheckpointListItemSchema,
   StoredAppCheckpointSchema,
 } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
 import { desc, eq } from "drizzle-orm";
@@ -48,25 +48,68 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
     await this.db.execute(`
      CREATE TABLE IF NOT EXISTS "AgentCheckpoints"
      (
-      "id" bigserial PRIMARY KEY NOT NULL,
-      "sessionId" text   NOT NULL,
-      "agentId"   text   NOT NULL,
-      "name"      text   NOT NULL,
-      "agentType" text   NOT NULL,
-      "state"     text   NOT NULL,
-      "createdAt" bigint NOT NULL
+      "id"
+      bigserial
+      PRIMARY
+      KEY
+      NOT
+      NULL,
+      "sessionId"
+      text
+      NOT
+      NULL,
+      "agentId"
+      text
+      NOT
+      NULL,
+      "name"
+      text
+      NOT
+      NULL,
+      "agentType"
+      text
+      NOT
+      NULL,
+      "state"
+      text
+      NOT
+      NULL,
+      "createdAt"
+      bigint
+      NOT
+      NULL
      );
     `);
 
     await this.db.execute(`
      CREATE TABLE IF NOT EXISTS "AppCheckpoints"
      (
-      "id" bigserial PRIMARY KEY NOT NULL,
-      "sessionId"        text   NOT NULL,
-      "hostname"         text   NOT NULL,
-      "projectDirectory" text   NOT NULL,
-      "state"            text   NOT NULL,
-      "createdAt"        bigint NOT NULL
+      "id"
+      bigserial
+      PRIMARY
+      KEY
+      NOT
+      NULL,
+      "sessionId"
+      text
+      NOT
+      NULL,
+      "hostname"
+      text
+      NOT
+      NULL,
+      "projectDirectory"
+      text
+      NOT
+      NULL,
+      "state"
+      text
+      NOT
+      NULL,
+      "createdAt"
+      bigint
+      NOT
+      NULL
      );
     `);
 
@@ -86,15 +129,15 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
         createdAt: checkpoint.createdAt,
       })
       .returning({ id: agentCheckpoints.id });
+    if (!result[0]) {
+      throw new Error("No data returned from database");
+    }
+
     return StoredAgentCheckpointSchema.shape.id.parse(result[0].id);
   }
 
   async retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null> {
-    const result = await this.db
-      .select()
-      .from(agentCheckpoints)
-      .where(eq(agentCheckpoints.id, id))
-      .limit(1);
+    const result = await this.db.select().from(agentCheckpoints).where(eq(agentCheckpoints.id, id)).limit(1);
 
     if (result.length === 0) return null;
 
@@ -128,15 +171,16 @@ export class PostgresStorage implements TokenRingService, AgentCheckpointStorage
         createdAt: checkpoint.createdAt,
       })
       .returning({ id: appCheckpoints.id });
+
+    if (!result[0]) {
+      throw new Error("No data returned from database");
+    }
+
     return StoredAgentCheckpointSchema.shape.id.parse(result[0].id);
   }
 
   async retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null> {
-    const result = await this.db
-      .select()
-      .from(appCheckpoints)
-      .where(eq(appCheckpoints.id, id))
-      .limit(1);
+    const result = await this.db.select().from(appCheckpoints).where(eq(appCheckpoints.id, id)).limit(1);
 
     if (result.length === 0) return null;
 
