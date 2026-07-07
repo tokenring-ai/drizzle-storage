@@ -14,14 +14,7 @@ export class MySQLQueries {
     }
   }
 
-  async insertAgent(
-    agentId: string,
-    sessionId: string,
-    name: string,
-    agentType: string,
-    state: string,
-    createdAt: number,
-  ): Promise<number> {
+  async insertAgent(agentId: string, sessionId: string, name: string, agentType: string, state: string, createdAt: number): Promise<number> {
     const result = await this.sql.unsafe<{ lastInsertRowid: number }>(
       "INSERT INTO `AgentCheckpoints` (`agentId`, `sessionId`, `name`, `agentType`, `state`, `createdAt`) VALUES ($1, $2, $3, $4, $5, $6)",
       [agentId, sessionId, name, agentType, state, createdAt],
@@ -29,13 +22,7 @@ export class MySQLQueries {
     return Number(result.lastInsertRowid);
   }
 
-  async insertApp(
-    sessionId: string,
-    hostname: string,
-    projectDirectory: string,
-    state: string,
-    createdAt: number,
-  ): Promise<number> {
+  async insertApp(sessionId: string, hostname: string, projectDirectory: string, state: string, createdAt: number): Promise<number> {
     const result = await this.sql.unsafe<{ lastInsertRowid: number }>(
       "INSERT INTO `AppCheckpoints` (`sessionId`, `hostname`, `projectDirectory`, `state`, `createdAt`) VALUES ($1, $2, $3, $4, $5)",
       [sessionId, hostname, projectDirectory, state, createdAt],
@@ -44,18 +31,12 @@ export class MySQLQueries {
   }
 
   async selectAgentById(id: number): Promise<AgentCheckpointRow | null> {
-    const result = await this.sql.unsafe<AgentCheckpointRow[]>(
-      "SELECT * FROM `AgentCheckpoints` WHERE `id` = $1 LIMIT 1",
-      [id],
-    );
+    const result = await this.sql.unsafe<AgentCheckpointRow[]>("SELECT * FROM `AgentCheckpoints` WHERE `id` = $1 LIMIT 1", [id]);
     return result.length > 0 ? result[0]! : null;
   }
 
   async selectAppById(id: number): Promise<AppCheckpointRow | null> {
-    const result = await this.sql.unsafe<AppCheckpointRow[]>(
-      "SELECT * FROM `AppCheckpoints` WHERE `id` = $1 LIMIT 1",
-      [id],
-    );
+    const result = await this.sql.unsafe<AppCheckpointRow[]>("SELECT * FROM `AppCheckpoints` WHERE `id` = $1 LIMIT 1", [id]);
     return result.length > 0 ? result[0]! : null;
   }
 
@@ -72,9 +53,7 @@ export class MySQLQueries {
   }
 
   async latestApp(): Promise<AppCheckpointRow | null> {
-    const rows = await this.sql.unsafe<AppCheckpointRow[]>(
-      "SELECT * FROM `AppCheckpoints` ORDER BY `createdAt` DESC LIMIT 1",
-    );
+    const rows = await this.sql.unsafe<AppCheckpointRow[]>("SELECT * FROM `AppCheckpoints` ORDER BY `createdAt` DESC LIMIT 1");
     return rows.length > 0 ? rows[0]! : null;
   }
 }

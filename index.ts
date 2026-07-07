@@ -19,5 +19,5 @@
  * ```
  */
 
-export { BunStorage, detectDatabaseDialect, bunStorageConfigSchema } from "./BunStorage.js";
+export { BunStorage, bunStorageConfigSchema, detectDatabaseDialect } from "./BunStorage.js";
 export { type BunStorageConfig, BunStorageConfigSchema } from "./schema.js";
