@@ -1,33 +1,23 @@
 /**
- * @tokenring-ai/drizzle-storage
+ * @tokenring-ai/bun-storage
  *
- * A multi-database storage solution for Token Ring AI agent state checkpoints using Drizzle ORM.
+ * A multi-database storage solution for Token Ring AI agent state checkpoints using Bun
  *
  * This package provides storage classes that implement both the AgentCheckpointStorage
- * and AppCheckpointStorage interfaces. It supports SQLite (Bun), MySQL, and PostgreSQL databases.
+ * and AppCheckpointStorage interfaces. It supports SQLite, MySQL, and PostgreSQL databases
+ * through Bun's native SQL client.
  *
  * @example
  * ```typescript
- * import { SQLiteStorage } from '@tokenring-ai/drizzle-storage';
+ * import { BunStorage } from '@tokenring-ai/bun-storage';
  *
- * const storage = new SQLiteStorage({
- *   type: "sqlite",
- *   databasePath: "./agent_state.db"
+ * const storage = new BunStorage({
+ *   connectionString: "sqlite://./agent_state.db"
  * });
  *
  * await storage.start();
  * ```
  */
 
-export {
-  MySQLStorage,
-  mysqlStorageConfigSchema,
-} from "./mysql/createMySQLStorage.js";
-export {
-  PostgresStorage,
-  postgresStorageConfigSchema,
-} from "./postgres/createPostgresStorage.js";
-export {
-  SQLiteStorage,
-  sqliteStorageConfigSchema,
-} from "./sqlite/createSQLiteStorage.js";
+export { BunStorage, detectDatabaseDialect, bunStorageConfigSchema } from "./BunStorage.js";
+export { type BunStorageConfig, BunStorageConfigSchema } from "./schema.js";

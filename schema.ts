@@ -1,6 +1,6 @@
-import z from "zod";
-import { mysqlStorageConfigSchema } from "./mysql/createMySQLStorage.ts";
-import { postgresStorageConfigSchema } from "./postgres/createPostgresStorage.ts";
-import { sqliteStorageConfigSchema } from "./sqlite/createSQLiteStorage.ts";
+import type z from "zod";
+import { bunStorageConfigSchema } from "./BunStorage.ts";
 
-export const DrizzleStorageConfigSchema = z.discriminatedUnion("type", [sqliteStorageConfigSchema, postgresStorageConfigSchema, mysqlStorageConfigSchema]);
+export const BunStorageConfigSchema = bunStorageConfigSchema;
+
+export type BunStorageConfig = z.infer<typeof BunStorageConfigSchema>;

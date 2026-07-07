@@ -1,14 +1,15 @@
-import { AgentCheckpointStorage, NamedAgentCheckpoint } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
-import { AppCheckpointStorage, AppSessionCheckpoint } from "@tokenring-ai/checkpoint/AppCheckpointStorage";
-import { afterAll, describe, expect, it } from "vitest";
+import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
+import type { NamedAgentCheckpoint } from "@tokenring-ai/checkpoint/AgentCheckpointStorage";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import type { BunStorage } from "./BunStorage.ts";
 
 const isBun = typeof Bun !== "undefined";
 
 /**
- * DrizzleStorage Tests
+ * BunStorage Tests
  *
- * Note: These tests require Bun runtime because the SQLite storage implementation
- * uses Bun's native `bun:sqlite` module. Tests will be skipped when running in
+ * Note: These tests require Bun runtime because the storage implementation
+ * uses Bun's native `SQL` client. Tests will be skipped when running in
  * Node.js environment.
  *
  * To run these tests:
@@ -16,7 +17,7 @@ const isBun = typeof Bun !== "undefined";
  * 2. MySQL/Postgres tests require Docker/testcontainers
  */
 
-describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
+describe("BunAgentStateStorage - SQLite (Bun Required)", () => {
   if (!isBun) {
     it.skip("SQLite tests require Bun runtime", () => {
       // This test is skipped when Bun is not available
@@ -26,20 +27,20 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
   }
 
   describe("SQLite Storage Operations", () => {
-    let storage: AgentCheckpointStorage;
+    let storage: BunStorage;
     const dbPath = "./test-agent-state.db";
 
     beforeAll(async () => {
-      // Use dynamic import to avoid bun:sqlite import error in Node.js
-      const { SQLiteStorage } = await import("./sqlite/createSQLiteStorage.js");
-      storage = new SQLiteStorage({
-        type: "sqlite",
-        databasePath: dbPath,
+      // Use dynamic import to avoid Bun SQL import errors in Node.js
+      const { BunStorage } = await import("./BunStorage.js");
+      storage = new BunStorage({
+        connectionString: `sqlite://${dbPath}`,
       });
       await storage.start();
     });
 
     afterAll(async () => {
+      await storage.stop();
       // Cleanup: remove test database file
       const { unlinkSync, existsSync } = await import("node:fs");
       if (existsSync(dbPath)) {
@@ -64,7 +65,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
 
       const id = await storage.storeAgentCheckpoint(checkpoint);
       expect(id).toBeDefined();
-      expect(typeof id).toBe("string");
+      expect(typeof id).toBe("number");
 
       const retrieved = await storage.retrieveAgentCheckpoint(id);
       expect(retrieved).toBeDefined();
@@ -87,7 +88,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
     });
 
     it("should return null for non-existent checkpoint", async () => {
-      const retrieved = await storage.retrieveAgentCheckpoint("999999");
+      const retrieved = await storage.retrieveAgentCheckpoint(999999);
       expect(retrieved).toBeNull();
     });
 
@@ -153,20 +154,20 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
   });
 
   describe("SQLite App Checkpoint Storage", () => {
-    let storage: AppCheckpointStorage;
+    let storage: BunStorage;
     const dbPath = "./test-app-state.db";
 
     beforeAll(async () => {
-      // Use dynamic import to avoid bun:sqlite import error in Node.js
-      const { SQLiteStorage } = await import("./sqlite/createSQLiteStorage.js");
-      storage = new SQLiteStorage({
-        type: "sqlite",
-        databasePath: dbPath,
+      // Use dynamic import to avoid Bun SQL import errors in Node.js
+      const { BunStorage } = await import("./BunStorage.js");
+      storage = new BunStorage({
+        connectionString: `sqlite://${dbPath}`,
       });
       await storage.start();
     });
 
     afterAll(async () => {
+      await storage.stop();
       // Cleanup: remove test database file
       const { unlinkSync, existsSync } = await import("node:fs");
       if (existsSync(dbPath)) {
@@ -185,7 +186,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
 
       const id = await storage.storeAppCheckpoint(checkpoint);
       expect(id).toBeDefined();
-      expect(typeof id).toBe("string");
+      expect(typeof id).toBe("number");
 
       const retrieved = await storage.retrieveAppCheckpoint(id);
       expect(retrieved).toBeDefined();
@@ -208,7 +209,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
     });
 
     it("should return null for non-existent app checkpoint", async () => {
-      const retrieved = await storage.retrieveAppCheckpoint("999999");
+      const retrieved = await storage.retrieveAppCheckpoint(999999);
       expect(retrieved).toBeNull();
     });
 
@@ -240,7 +241,7 @@ describe("DrizzleAgentStateStorage - SQLite (Bun Required)", () => {
   });
 });
 
-describe("DrizzleAgentStateStorage - MySQL & PostgreSQL", () => {
+describe("BunAgentStateStorage - MySQL & PostgreSQL", () => {
   if (!isBun) {
     it.skip("Database tests require Bun runtime and Docker", () => {
       expect(true).toBe(true);

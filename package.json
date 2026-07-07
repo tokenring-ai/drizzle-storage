@@ -1,17 +1,13 @@
 {
-  "name": "@tokenring-ai/drizzle-storage",
+  "name": "@tokenring-ai/bun-storage",
   "version": "0.2.0",
-  "description": "Multi-database persistence layer powered by the Drizzle ORM.",
+  "description": "Multi-database persistence layer powered by the native bun DB driver.",
   "dependencies": {
     "@tokenring-ai/app": "workspace:*",
     "@tokenring-ai/checkpoint": "workspace:*",
-    "zod": "^4.4.3",
-    "drizzle-orm": "^0.45.2",
-    "mysql2": "^3.22.5",
-    "postgres": "^3.4.9"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.10",
     "vitest": "^4.1.1",
     "bun-types": "^1.3.11",
     "typescript": "^6.0.2"
@@ -23,10 +19,6 @@
   "license": "MIT",
   "scripts": {
     "test": "vitest run",
-    "db:generate": "bun run db:generate:sqlite && bun run db:generate:postgres && bun run db:generate:mysql",
-    "db:generate:sqlite": "cd sqlite && drizzle-kit generate",
-    "db:generate:postgres": "cd postgres && drizzle-kit generate",
-    "db:generate:mysql": "cd mysql && drizzle-kit generate",
     "build": "tsc --noEmit",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
