@@ -59,7 +59,7 @@ export function detectDatabaseDialect(connectionString: string): DatabaseDialect
     return "sqlite";
   }
 
-  if (connectionString.startsWith("mysql://") || connectionString.startsWith("mysql2://")) {
+  if (connectionString.startsWith("mysql://") || connectionString.startsWith("mysql2://") || connectionString.startsWith("mariadb://")) {
     return "mysql";
   }
 
