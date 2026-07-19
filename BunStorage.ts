@@ -1,4 +1,5 @@
 import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
+import type { ConfigFieldMeta } from "@tokenring-ai/app/config/metadata";
 import type { TokenRingService } from "@tokenring-ai/app/types";
 import {
   type AgentCheckpointListItem,
@@ -43,10 +44,21 @@ export type AppCheckpointRow = {
   createdAt: number | string | bigint;
 };
 
-export const bunStorageConfigSchema = z.object({
-  connectionString: z.string(),
-  migrationsFolder: z.string().exactOptional(),
-});
+export const bunStorageConfigSchema = z
+  .object({
+    connectionString: z
+      .string()
+      .meta({
+        sensitive: true,
+        restartRequired: true,
+        description: "Database connection string (sqlite:, mysql://, postgres://)",
+      } satisfies ConfigFieldMeta),
+    migrationsFolder: z
+      .string()
+      .exactOptional()
+      .meta({ advanced: true, restartRequired: true, description: "Directory containing SQL migration files" } satisfies ConfigFieldMeta),
+  })
+  .meta({ label: "Bun Storage", description: "SQL-backed checkpoint storage using Bun's SQL client" } satisfies ConfigFieldMeta);
 
 export function detectDatabaseDialect(connectionString: string): DatabaseDialect {
   if (
