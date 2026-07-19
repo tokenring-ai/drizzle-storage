@@ -1,5 +1,5 @@
-import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
 import type { ConfigFieldMeta } from "@tokenring-ai/app/config/metadata";
+import type { AppSessionCheckpoint } from "@tokenring-ai/app/schema";
 import type { TokenRingService } from "@tokenring-ai/app/types";
 import {
   type AgentCheckpointListItem,
@@ -46,13 +46,11 @@ export type AppCheckpointRow = {
 
 export const bunStorageConfigSchema = z
   .object({
-    connectionString: z
-      .string()
-      .meta({
-        sensitive: true,
-        restartRequired: true,
-        description: "Database connection string (sqlite:, mysql://, postgres://)",
-      } satisfies ConfigFieldMeta),
+    connectionString: z.string().meta({
+      sensitive: true,
+      restartRequired: true,
+      description: "Database connection string (sqlite:, mysql://, postgres://)",
+    } satisfies ConfigFieldMeta),
     migrationsFolder: z
       .string()
       .exactOptional()
