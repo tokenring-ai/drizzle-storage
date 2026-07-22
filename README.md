@@ -407,7 +407,6 @@ bun run build
 | `@tokenring-ai/checkpoint`       | workspace:*| Checkpoint storage interfaces              |
 | `zod`                            | ^4.4.3     | Schema validation                          |
 | `bun-types` (dev)                | ^1.3.11    | Bun type definitions                       |
-| `vitest` (dev)                   | ^4.1.1     | Testing framework                          |
 | `typescript` (dev)               | ^6.0.2     | TypeScript compiler                        |
 
 ### Related Components

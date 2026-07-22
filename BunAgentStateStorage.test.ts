@@ -5,6 +5,20 @@ import type { BunStorage } from "./BunStorage.ts";
 
 const isBun = typeof Bun !== "undefined";
 
+function isDockerAvailable(): boolean {
+  try {
+    const result = Bun.spawnSync(["docker", "info"], {
+      stdout: "ignore",
+      stderr: "ignore",
+    });
+    return result.exitCode === 0;
+  } catch {
+    return false;
+  }
+}
+
+const hasDocker = isBun && isDockerAvailable();
+
 /**
  * BunStorage Tests
  *
@@ -241,8 +255,9 @@ describe("BunAgentStateStorage - SQLite (Bun Required)", () => {
 });
 
 describe("BunAgentStateStorage - MySQL & PostgreSQL", () => {
-  if (!isBun) {
+  if (!isBun || !hasDocker) {
     it.skip("Database tests require Bun runtime and Docker", () => {
+      // This test is skipped when Bun or Docker is not available
       expect(true).toBe(true);
     });
     return;
